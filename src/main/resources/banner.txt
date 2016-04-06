@@ -1,0 +1,9 @@
+
+${AnsiStyle.BOLD}${AnsiColor.BRIGHT_BLUE}  ______      _____ ${AnsiColor.DEFAULT} ____             _                  _
+${AnsiStyle.BOLD}${AnsiColor.BRIGHT_BLUE} |  ____/\   |  __ \${AnsiColor.DEFAULT}|  _ \           | |                | |
+${AnsiStyle.BOLD}${AnsiColor.BRIGHT_BLUE} | |__ /  \  | |__) |${AnsiColor.DEFAULT} |_) | __ _  ___| | _____ _ __   __| |
+${AnsiStyle.BOLD}${AnsiColor.BRIGHT_BLUE} |  __/ /\ \ |  ___/${AnsiColor.DEFAULT}|  _ < / _` |/ __| |/ / _ \ '_ \ / _` |
+${AnsiStyle.BOLD}${AnsiColor.BRIGHT_BLUE} | | / ____ \| |    ${AnsiColor.DEFAULT}| |_) | (_| | (__|   <  __/ | | | (_| |
+${AnsiStyle.BOLD}${AnsiColor.BRIGHT_BLUE} |_|/_/    \_\_|    ${AnsiColor.DEFAULT}|____/ \__,_|\___|_|\_\___|_| |_|\__,_|
+
+${AnsiStyle.BOLD}:: THE ONE AND ONLY :: Running Spring Boot ${spring-boot.version} :: *Heavy Breathing*

@@ -15,7 +15,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'spring-boot' 
+apply plugin: 'spring-boot'
 
 jar {
 	baseName = 'FAPBackend'
@@ -30,15 +30,33 @@ repositories {
 	maven { url "https://repo.spring.io/milestone" }
 }
 
+configurations {
+    provided
+}
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
 
 dependencies {
+    provided ('org.projectlombok:lombok:1.16.8')
+
+    //Spring
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-data-rest')
 	compile('org.springframework.data:spring-data-rest-hal-browser')
 	compile('org.springframework.boot:spring-boot-starter-hateoas')
 	compile('org.springframework.boot:spring-boot-starter-web')
+
+    //DB
 	runtime('mysql:mysql-connector-java')
-	testCompile('org.springframework.boot:spring-boot-starter-test') 
+    runtime('org.hsqldb:hsqldb')
+
+
+    //Test
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+
 }
 
 
