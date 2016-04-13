@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -28,5 +29,10 @@ public class Airport extends BaseEntity{
     @NonNull
     @Size(min = 3)
     String name;
+
+    @NotNull
+    @NonNull
+    @Column(unique = true)
+    String id;
 
 }
