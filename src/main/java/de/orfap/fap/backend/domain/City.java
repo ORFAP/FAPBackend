@@ -23,7 +23,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Airport extends BaseEntity{
+public class City extends BaseEntity{
 
     @NotNull
     @NonNull

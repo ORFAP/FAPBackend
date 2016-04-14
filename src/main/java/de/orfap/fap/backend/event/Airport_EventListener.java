@@ -1,6 +1,6 @@
 package de.orfap.fap.backend.event;
 
-import de.orfap.fap.backend.domain.Airport;
+import de.orfap.fap.backend.domain.City;
 import org.springframework.data.rest.core.event.AbstractRepositoryEventListener;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
  */
 @Component
-public class Airport_EventListener extends AbstractRepositoryEventListener<Airport> {
+public class Airport_EventListener extends AbstractRepositoryEventListener<City> {
 
 	// If you need access to the database you can autowire a Repository.
 	//
