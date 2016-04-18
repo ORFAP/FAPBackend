@@ -20,12 +20,12 @@ import java.util.UUID;
 @RepositoryRestResource
 public interface RouteRepository extends CrudRepository<Route, UUID> {
 
-    //FindBy Methods
-    // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
+  //FindBy Methods
+  // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
 
-    List<Route> findByAirline_NameContainingIgnoreCaseOrSource_NameContainingIgnoreCaseOrDestination_NameContainingIgnoreCase(
-            @Param("name") String airportName,
-            @Param("name") String sourcename,
-            @Param("name") String destinationname);
+  List<Route> findByAirline_NameContainingIgnoreCaseOrSource_NameContainingIgnoreCaseOrDestination_NameContainingIgnoreCase(
+      @Param("name") String airportName,
+      @Param("name") String sourcename,
+      @Param("name") String destinationname);
 
 }

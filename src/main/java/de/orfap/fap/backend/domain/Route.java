@@ -5,7 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
@@ -26,36 +27,36 @@ import java.util.Date;
 @NoArgsConstructor
 public class Route extends BaseEntity {
 
-    @NotNull
-    @NonNull
-    @Past
-    Date date;
+  @NotNull
+  @NonNull
+  @Past
+  Date date;
 
-    @Min(0)
-    int delays;
+  @Min(0)
+  int delays;
 
-    @Min(0)
-    int cancelled;
+  @Min(0)
+  int cancelled;
 
-    @Min(0)
-    int passengerCount;
+  @Min(0)
+  int passengerCount;
 
-    @Min(0)
-    int flightCount;
+  @Min(0)
+  int flightCount;
 
-    @ManyToOne
-    @NotNull
-    @NonNull
-    Airline airline;
+  @ManyToOne
+  @NotNull
+  @NonNull
+  Airline airline;
 
-    @ManyToOne
-    @NotNull
-    @NonNull
-    City source;
+  @ManyToOne
+  @NotNull
+  @NonNull
+  City source;
 
-    @ManyToOne
-    @NotNull
-    @NonNull
-    City destination;
+  @ManyToOne
+  @NotNull
+  @NonNull
+  City destination;
 
 }

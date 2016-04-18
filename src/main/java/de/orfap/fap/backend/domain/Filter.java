@@ -24,21 +24,21 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Filter extends BaseEntity{
+public class Filter extends BaseEntity {
 
-    @ElementCollection
-    List<String> airports;
+  @ElementCollection
+  List<String> airports;
 
-    @ElementCollection
-    List<String> airlines;
+  @ElementCollection
+  List<String> airlines;
 
-    @Past
-    Date start;
+  @Past
+  Date start;
 
-    @Past
-    Date end;
+  @Past
+  Date end;
 
-    @Embedded
-    User user;
+  @Embedded
+  User user;
 
 }

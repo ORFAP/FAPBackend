@@ -24,8 +24,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class User {
 
-    @NotNull
-    @NonNull
-    @Size(min = 3)
-    String name;
+  @NotNull
+  @NonNull
+  @Size(min = 3)
+  String name;
 }

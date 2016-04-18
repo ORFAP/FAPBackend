@@ -18,8 +18,8 @@ import java.util.UUID;
 @RepositoryRestResource
 public interface CityRepository extends CrudRepository<City, UUID> {
 
-    //FindBy Methods
-    // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
+  //FindBy Methods
+  // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
 
 
 }

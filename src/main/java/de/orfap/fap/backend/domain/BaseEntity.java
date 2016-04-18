@@ -24,15 +24,15 @@ import java.util.UUID;
 @Data
 public abstract class BaseEntity implements Cloneable, Serializable {
 
-    @Column(name = "OID")
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Type(type="uuid-char")
-    UUID oid;
+  @Column(name = "OID")
+  @Id
+  @GeneratedValue(generator = "uuid")
+  @GenericGenerator(name = "uuid", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  UUID oid;
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    return super.clone();
+  }
 }

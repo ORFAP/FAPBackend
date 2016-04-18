@@ -23,16 +23,16 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Airline extends BaseEntity{
+public class Airline extends BaseEntity {
 
-    @NotNull
-    @NonNull
-    @Size(min = 3)
-    String name;
+  @NotNull
+  @NonNull
+  @Size(min = 3)
+  String name;
 
-    @NotNull
-    @NonNull
-    @Column(unique = true)
-    String id;
+  @NotNull
+  @NonNull
+  @Column(unique = true)
+  String id;
 
 }
