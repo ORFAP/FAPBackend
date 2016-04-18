@@ -39,6 +39,9 @@ public class Filter extends BaseEntity {
   Date end;
 
   @Embedded
+  Setting setting;
+
+  @Embedded
   User user;
 
 }
