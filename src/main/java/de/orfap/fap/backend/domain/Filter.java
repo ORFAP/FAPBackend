@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import javax.validation.constraints.Past;
 import java.util.Date;
 import java.util.List;
@@ -20,28 +19,25 @@ import java.util.List;
  * Java-Version: 1.8
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
  */
-@Entity
+@Embeddable
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Filter extends BaseEntity {
+public class Filter {
 
   @ElementCollection
-  List<String> airports;
+  List<String> originFilter;
 
   @ElementCollection
-  List<String> airlines;
+  List<String> destinationFilter;
+
+  @ElementCollection
+  List<String> arlineFilter;
 
   @Past
-  Date start;
+  Date rangeFrom;
 
   @Past
-  Date end;
-
-  @Embedded
-  Setting setting;
-
-  @Embedded
-  User user;
+  Date rangeTo;
 
 }
