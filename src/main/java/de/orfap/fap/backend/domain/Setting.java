@@ -23,7 +23,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Setting {
+public class Setting extends BaseEntity{
 
   @NotNull
   @NonNull
