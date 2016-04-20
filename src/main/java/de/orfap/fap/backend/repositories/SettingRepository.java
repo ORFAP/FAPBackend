@@ -23,7 +23,7 @@ public interface SettingRepository extends CrudRepository<Setting, UUID> {
   //FindBy Methods
   // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
 
-  List<Setting> findByNameContainingIgnoreCaseOrCreatorContainingIgnoreCaseOrDestination(
+  List<Setting> findByNameContainingIgnoreCaseOrCreatorContainingIgnoreCase(
       @Param("name") String name,
       @Param("name") String creator);
 
