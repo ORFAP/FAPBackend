@@ -13,7 +13,7 @@
 3. FapBackendApplication.main als Spring Application starten
 
 ###Docker
-```docker run -p 8080:8081 darenegade/fapbackend```
+```docker run -p 8081:8080 darenegade/fapbackend```
 
 
 ##RESTful
