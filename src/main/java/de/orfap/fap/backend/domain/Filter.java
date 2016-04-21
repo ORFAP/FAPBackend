@@ -32,7 +32,7 @@ public class Filter {
   List<String> destinationFilter;
 
   @ElementCollection
-  List<String> arlineFilter;
+  List<String> airlineFilter;
 
   @Past
   Date rangeFrom;
