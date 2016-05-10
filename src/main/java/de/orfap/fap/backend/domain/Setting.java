@@ -8,7 +8,9 @@ import lombok.NonNull;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
+import java.util.Date;
 
 /**
  * Organization: HM FK07.
@@ -37,10 +39,20 @@ public class Setting extends BaseEntity{
 
   boolean shareable;
 
+  @Past
+  Date rangeFrom;
+
+  @Past
+  Date rangeTo;
+
   @Embedded
+  @NotNull
+  @NonNull
   Filter filter;
 
   @Embedded
+  @NotNull
+  @NonNull
   Axis axis;
 
 }
