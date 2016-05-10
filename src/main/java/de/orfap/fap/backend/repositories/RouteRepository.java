@@ -5,6 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,9 +24,10 @@ public interface RouteRepository extends CrudRepository<Route, UUID> {
   //FindBy Methods
   // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
 
-  List<Route> findByAirline_NameContainingIgnoreCaseOrSource_NameContainingIgnoreCaseOrDestination_NameContainingIgnoreCase(
-      @Param("name") String airportName,
-      @Param("name") String sourcename,
-      @Param("name") String destinationname);
+  List<Route> findByAirline_NameInOrDestination_NameInAndDateBetween(
+      @Param("airports") List<String> airports,
+      @Param("destinations") List<String> destinations,
+      @Param("start")Date start,
+      @Param("end")Date end);
 
 }
