@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -23,7 +23,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Airline extends BaseEntity {
+public class Airline {
 
   @NotNull
   @NonNull
@@ -32,7 +32,7 @@ public class Airline extends BaseEntity {
 
   @NotNull
   @NonNull
-  @Column(unique = true)
+  @Id
   String id;
 
 }

@@ -4,8 +4,6 @@ import de.orfap.fap.backend.domain.Airline;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import java.util.UUID;
-
 /**
  * Organization: HM FK07.
  * Project: FAPBackend, de.orfap.fap.backend.event
@@ -16,7 +14,7 @@ import java.util.UUID;
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
  */
 @RepositoryRestResource
-public interface AirlineRepository extends CrudRepository<Airline, UUID> {
+public interface AirlineRepository extends CrudRepository<Airline, String> {
 
   //FindBy Methods
   // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
