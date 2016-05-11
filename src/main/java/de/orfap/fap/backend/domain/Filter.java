@@ -26,10 +26,10 @@ import java.util.List;
 public class Filter {
 
   @ElementCollection
-  List<String> destination;
+  List<String> destinations;
 
   @ElementCollection
-  List<String> airline;
+  List<String> airlines;
 
   @NotNull
   @NonNull
