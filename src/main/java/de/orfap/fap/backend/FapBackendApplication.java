@@ -8,6 +8,8 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 public class FapBackendApplication {
 
+
+
   public static void main(String[] args) {
     SpringApplication.run(FapBackendApplication.class, args);
   }

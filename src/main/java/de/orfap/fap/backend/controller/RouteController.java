@@ -12,13 +12,12 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,7 @@ public class RouteController {
 
   @RequestMapping("/filter")
   @Cacheable("filter")
-  public Map<String, List<Integer>> filter(Setting setting) {
+  public Map<String, Integer> filter(Setting setting) {
 
     checkSetting(setting);
 
@@ -55,7 +54,7 @@ public class RouteController {
     );
 
     //SetUp Date
-    DateTimeFormatter timeFormat = getDateTimeFormatter(setting.getFilter().getTimestep());
+    SimpleDateFormat timeFormat = getDateTimeFormatter(setting.getFilter().getTimestep());
 
     //Compute result
     switch (setting.getAxis().getX()) {
@@ -91,8 +90,8 @@ public class RouteController {
       throw new AssertionError("Filter should not be null!");
   }
 
-  private Map<String, List<Integer>> mapByTime(
-      DateTimeFormatter timeFormat,
+  public Map<String, Integer> mapByTime(
+      SimpleDateFormat timeFormat,
       QuantitiveValue quant, List<Route> routes) {
 
     //Sort by Date and sum values
@@ -100,19 +99,19 @@ public class RouteController {
         .stream()
         .peek(route -> {
           //Normalize date of route to timeStep
-          LocalDate reducedDate = LocalDate.from(timeFormat.parse(route.getDate().toString()));
-          route.setDate(Date.from(reducedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+          try {
+            route.setDate(timeFormat.parse(timeFormat.format(route.getDate())));
+          } catch (ParseException e){
+            throw new AssertionError("Date Parse Error");
+          }
         })
-        .collect(Collectors.groupingBy(route -> route.getDate().toString(),
-            Collectors.collectingAndThen(
-                Collectors.summingInt(route -> getQuant(quant, route)),
-                Collections::singletonList
-            )
+        .collect(Collectors.groupingBy(route -> timeFormat.format(route.getDate()),
+            Collectors.summingInt(route -> getQuant(quant, route))
             )
         );
   }
 
-  private Map<String, List<Route>> mapByAirline(List<Route> routes) {
+  public Map<String, List<Route>> mapByAirline(List<Route> routes) {
 
     //Grouping Routes to Airlines
     return routes.stream()
@@ -121,7 +120,7 @@ public class RouteController {
 
   }
 
-  private Map<String, List<Route>> mapByDestination(List<Route> routes) {
+  public Map<String, List<Route>> mapByDestination(List<Route> routes) {
 
     //Grouping Routes to Destination
     return routes.stream()
@@ -130,10 +129,10 @@ public class RouteController {
 
   }
 
-  private Map<String, List<Integer>> mapToQuantitive(
-      DateTimeFormatter timeFormat, QuantitiveValue quant, Map<String, List<Route>> routeMap) {
+  public Map<String, Integer> mapToQuantitive(
+      SimpleDateFormat timeFormat, QuantitiveValue quant, Map<String, List<Route>> routeMap) {
 
-    Map<String, List<Integer>> result = new HashMap<>();
+    Map<String, Integer> result = new HashMap<>();
 
     //Map to quantity for each key
     for (String key : routeMap.keySet()) {
@@ -143,25 +142,28 @@ public class RouteController {
           .stream()
           .peek(route -> {
             //Normalize date of route to timeStep
-            LocalDate reducedDate = LocalDate.from(timeFormat.parse(route.getDate().toString()));
-            route.setDate(Date.from(reducedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            try {
+              route.setDate(timeFormat.parse(timeFormat.format(route.getDate())));
+            } catch (ParseException e){
+              throw new AssertionError("Date Parse Error");
+            }
           })
           .collect(Collectors.groupingBy(Route::getDate,
               Collectors.mapping(route -> route, Collectors.toList())));
 
       //Strip to one value
-      List<Integer> stripList = dateMap.entrySet().stream()
+      Integer value = dateMap.entrySet().stream()
           .sorted(Map.Entry.comparingByKey())
-          .map(e -> e.getValue().stream().mapToInt(route -> getQuant(quant, route)).sum())
-          .collect(Collectors.toList());
+          .mapToInt(e -> e.getValue().stream().mapToInt(route -> getQuant(quant, route)).sum())
+          .sum();
 
-      result.put(key, stripList);
+      result.put(key, value);
     }
 
     return result;
   }
 
-  private int getQuant(QuantitiveValue quant, Route route) {
+  public int getQuant(QuantitiveValue quant, Route route) {
     switch (quant) {
 
       case FLIGHTS:
@@ -179,15 +181,15 @@ public class RouteController {
     }
   }
 
-  private DateTimeFormatter getDateTimeFormatter(TimeSteps timeStep) {
+  public SimpleDateFormat getDateTimeFormatter(TimeSteps timeStep) {
     switch (timeStep) {
 
       case DAY_OF_WEEK:
-        return DateTimeFormatter.ofPattern("dd.MM.uuuu");
+        return new SimpleDateFormat("EEEE", Locale.US);
       case MONTH:
-        return DateTimeFormatter.ofPattern("MM.uuuu");
+        return new SimpleDateFormat("MMMM", Locale.US);
       case YEAR:
-        return DateTimeFormatter.ofPattern("uuuu");
+        return new SimpleDateFormat("yyyy", Locale.US);
       default:
         return null;
     }
