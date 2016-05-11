@@ -15,8 +15,6 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.UUID;
-
 import static com.jayway.restassured.RestAssured.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -58,14 +56,13 @@ public class FapBackendApplicationTests {
   @Test
   public void canFetchFirst() {
 
-    UUID firstID = first.getOid();
+    String firstID = first.getId();
 
     when().
         get(BASEPATH + "/{id}", firstID).
     then().
         statusCode(HttpStatus.SC_OK).
-        body("name", Matchers.is("AIR")).
-        body("id", Matchers.is("X-X"));
+        body("name", Matchers.is("AIR"));
 
   }
 
