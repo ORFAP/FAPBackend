@@ -9,7 +9,9 @@ import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
@@ -39,9 +41,9 @@ public class RouteController {
   @Autowired
   RouteRepository routeRepository;
 
-  @RequestMapping("/filter")
+  @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
-  public Map<String, Integer> filter(Setting setting) {
+  public Map<String, Integer> filter(@RequestBody Setting setting) {
 
     checkSetting(setting);
 
