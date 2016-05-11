@@ -21,5 +21,7 @@ Erlaubt sind alle CRUD Operationen und es ist eine Suche implementiert. Hateos i
 Übermittlung der Daten im JSON Format.
 Schnittstellen:
 * /airlines
-* /citys
+* /markets
 * /routes
+* /routes/filter
+* /settings
