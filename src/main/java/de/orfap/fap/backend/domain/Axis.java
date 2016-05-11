@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Embeddable;
-import javax.validation.constraints.Min;
 
 /**
  * Organization: HM FK07.
@@ -22,9 +21,7 @@ import javax.validation.constraints.Min;
 @NoArgsConstructor
 public class Axis {
 
-  @Min(0)
-  int x;
+  QualitiativeValue x;
 
-  @Min(0)
-  int y;
+  QuantitiveValue y;
 }

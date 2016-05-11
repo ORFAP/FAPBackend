@@ -3,11 +3,11 @@ package de.orfap.fap.backend.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
-import javax.validation.constraints.Past;
-import java.util.Date;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -26,18 +26,13 @@ import java.util.List;
 public class Filter {
 
   @ElementCollection
-  List<String> originFilter;
+  List<String> destination;
 
   @ElementCollection
-  List<String> destinationFilter;
+  List<String> airline;
 
-  @ElementCollection
-  List<String> airlineFilter;
-
-  @Past
-  Date rangeFrom;
-
-  @Past
-  Date rangeTo;
+  @NotNull
+  @NonNull
+  TimeSteps timestep;
 
 }
