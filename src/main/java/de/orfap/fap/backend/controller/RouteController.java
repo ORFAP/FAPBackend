@@ -46,11 +46,11 @@ public class RouteController {
     checkSetting(setting);
 
     //Find filtered Data
-    List<Route> routes = routeRepository.findByAirline_NameInOrDestination_NameInAndDateBetween(
-        setting.getFilter().getAirlines(),
-        setting.getFilter().getDestinations(),
+    List<Route> routes = routeRepository.findByDateBetweenAirportDestination(
         setting.getRangeFrom(),
-        setting.getRangeTo()
+        setting.getRangeTo(),
+        setting.getFilter().getAirlines(),
+        setting.getFilter().getDestinations()
     );
 
     //SetUp Date

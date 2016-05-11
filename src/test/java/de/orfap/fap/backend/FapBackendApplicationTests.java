@@ -6,10 +6,15 @@ import de.orfap.fap.backend.domain.City;
 import de.orfap.fap.backend.domain.QuantitiveValue;
 import de.orfap.fap.backend.domain.Route;
 import de.orfap.fap.backend.domain.TimeSteps;
+import de.orfap.fap.backend.repositories.AirlineRepository;
+import de.orfap.fap.backend.repositories.CityRepository;
+import de.orfap.fap.backend.repositories.RouteRepository;
+import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -17,25 +22,90 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = FapBackendApplication.class)
 @WebAppConfiguration
-@IntegrationTest("server.port:0")
+@SuppressWarnings("unchecked")
 public class FapBackendApplicationTests {
 
   private List<Route> routes = new ArrayList<>();
+  private SimpleDateFormat dateParser;
 
-  RouteController routeController = new RouteController();
+  @Autowired
+  RouteRepository routeRepository;
+  @Autowired
+  CityRepository cityRepository;
+  @Autowired
+  AirlineRepository airlineRepository;
 
-  @Value("${local.server.port}")
-  private int serverPort;
+
+  @Autowired
+  RouteController routeController;
+
+  @Test
+  public void testFilterFindBy1() throws Exception{
+
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.singletonList("Lufthansa"),
+        Collections.EMPTY_LIST
+    );
+
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(Collections.singleton(routes.get(1)).toArray()));
+  }
+
+  @Test
+  public void testFilterFindBy2() throws Exception{
+
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.EMPTY_LIST,
+        Collections.singletonList("NewYork")
+    );
+
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(Collections.singleton(routes.get(2)).toArray()));
+  }
+
+  @Test
+  public void testFilterFindBy3() throws Exception{
+
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.singletonList("AirBerlin"),
+        Collections.singletonList("Detroit")
+    );
+
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(Collections.singleton(routes.get(0)).toArray()));
+  }
+
+  @Test
+  public void testFilterFindBy4() throws Exception{
+
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.EMPTY_LIST,
+        Collections.EMPTY_LIST
+    );
+
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(routes.subList(0,3).toArray()));
+  }
 
   @Test
   public void mapByAirline() {
@@ -167,15 +237,25 @@ public class FapBackendApplicationTests {
 
   @Before
   public void setUp() {
+    routeRepository.deleteAll();
+    cityRepository.deleteAll();
+    airlineRepository.deleteAll();
 
     Airline airberlin = new Airline("AirBerlin", "XXX");
     Airline lufthansa = new Airline("Lufthansa", "YYY");
+
+    airlineRepository.save(airberlin);
+    airlineRepository.save(lufthansa);
 
     City newYork = new City("NewYork", "NNN");
     City detroit = new City("Detroit", "DDD");
     City sanFran = new City("SanFrancisco", "SSS");
 
-    SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd");
+    cityRepository.save(newYork);
+    cityRepository.save(detroit);
+    cityRepository.save(sanFran);
+
+    dateParser = new SimpleDateFormat("yyyy-MM-dd");
 
     Date firstJan14;
     Date secondJan14;
@@ -283,7 +363,7 @@ public class FapBackendApplicationTests {
         .build()
     );
 
-    RestAssured.port = serverPort;
+    routeRepository.save(routes);
   }
 
   @After
