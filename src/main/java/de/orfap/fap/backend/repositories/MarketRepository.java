@@ -14,7 +14,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
  */
 @RepositoryRestResource
-public interface CityRepository extends CrudRepository<Market, String> {
+public interface MarketRepository extends CrudRepository<Market, String> {
 
   //FindBy Methods
   // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
