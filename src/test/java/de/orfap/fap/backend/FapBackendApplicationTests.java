@@ -1,72 +1,374 @@
 package de.orfap.fap.backend;
 
-import com.jayway.restassured.RestAssured;
+import de.orfap.fap.backend.controller.RouteController;
 import de.orfap.fap.backend.domain.Airline;
+import de.orfap.fap.backend.domain.City;
+import de.orfap.fap.backend.domain.QuantitiveValue;
+import de.orfap.fap.backend.domain.Route;
+import de.orfap.fap.backend.domain.TimeSteps;
 import de.orfap.fap.backend.repositories.AirlineRepository;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
+import de.orfap.fap.backend.repositories.CityRepository;
+import de.orfap.fap.backend.repositories.RouteRepository;
+import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.UUID;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static com.jayway.restassured.RestAssured.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = FapBackendApplication.class)
 @WebAppConfiguration
-@IntegrationTest("server.port:0")
+@SuppressWarnings("unchecked")
 public class FapBackendApplicationTests {
 
-  public static final String BASEPATH = "/airlines";
+  private List<Route> routes = new ArrayList<>();
+  private SimpleDateFormat dateParser;
 
-  @Value("${local.server.port}")
-  private int serverPort;
-
+  @Autowired
+  RouteRepository routeRepository;
+  @Autowired
+  CityRepository cityRepository;
   @Autowired
   AirlineRepository airlineRepository;
 
-  private Airline first;
-  private Airline second;
 
-  @Before
-  public void setUp() {
-    airlineRepository.deleteAll();
+  @Autowired
+  RouteController routeController;
 
-    Airline airline0 = new Airline();
-    airline0.setName("AIR");
-    airline0.setId("X-X");
+  @Test
+  public void testFilterFindBy1() throws Exception{
 
-    first = airlineRepository.save(airline0);
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.singletonList("Lufthansa"),
+        Collections.EMPTY_LIST
+    );
 
-    Airline airline1 = new Airline();
-    airline1.setName("Luft");
-    airline1.setId("Y-X");
-
-    second = airlineRepository.save(airline1);
-
-    RestAssured.port = serverPort;
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(Collections.singleton(routes.get(1)).toArray()));
   }
 
   @Test
-  public void canFetchFirst() {
+  public void testFilterFindBy2() throws Exception{
 
-    UUID firstID = first.getOid();
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.EMPTY_LIST,
+        Collections.singletonList("NewYork")
+    );
 
-    when().
-        get(BASEPATH + "/{id}", firstID).
-    then().
-        statusCode(HttpStatus.SC_OK).
-        body("name", Matchers.is("AIR")).
-        body("id", Matchers.is("X-X"));
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(Collections.singleton(routes.get(2)).toArray()));
+  }
 
+  @Test
+  public void testFilterFindBy3() throws Exception{
+
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.singletonList("AirBerlin"),
+        Collections.singletonList("Detroit")
+    );
+
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(Collections.singleton(routes.get(0)).toArray()));
+  }
+
+  @Test
+  public void testFilterFindBy4() throws Exception{
+
+    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2014-01-03"),
+        Collections.EMPTY_LIST,
+        Collections.EMPTY_LIST
+    );
+
+    assertThat(result,
+        IsIterableContainingInAnyOrder.containsInAnyOrder(routes.subList(0,3).toArray()));
+  }
+
+  @Test
+  public void mapByAirline() {
+    Map<String, List<Route>> result = routeController.mapByAirline(routes.subList(0, 3));
+
+    HashMap<String, List<Route>> check = new HashMap<>();
+    //Airberlin
+    List<Route> airberlinRoutes = new ArrayList<>();
+    airberlinRoutes.add(routes.get(0));
+    airberlinRoutes.add(routes.get(2));
+    check.put("AirBerlin", airberlinRoutes);
+    //Lufthansa
+    List<Route> lufthansaRoutes = new ArrayList<>();
+    lufthansaRoutes.add(routes.get(1));
+    check.put("Lufthansa", lufthansaRoutes);
+
+
+    assertEquals(check, result);
+  }
+
+  @Test
+  public void mapByDestination() {
+    Map<String, List<Route>> result = routeController.mapByDestination(routes.subList(0, 3));
+
+    HashMap<String, List<Route>> check = new HashMap<>();
+    //Detroit
+    List<Route> detroitRoutes = new ArrayList<>();
+    detroitRoutes.add(routes.get(0));
+    check.put("Detroit", detroitRoutes);
+
+    List<Route> sanFranRoutes = new ArrayList<>();
+    sanFranRoutes.add(routes.get(1));
+    check.put("SanFrancisco", sanFranRoutes);
+
+    List<Route> newYorkRoutes = new ArrayList<>();
+    newYorkRoutes.add(routes.get(2));
+    check.put("NewYork", newYorkRoutes);
+
+
+    assertEquals(check, result);
+  }
+
+  @Test
+  public void mapByTimeDay() {
+    Map<String, Integer> result = routeController.mapByTime(
+        routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK),
+        QuantitiveValue.FLIGHTS,
+        routes.subList(0, 3));
+
+
+    Map<String, Integer> check = new HashMap<>();
+    check.put("Wednesday", 1);
+    check.put("Thursday", 1);
+    check.put("Friday", 1);
+
+    assertEquals(check, result);
+  }
+
+  @Test
+  public void mapByTimeMonth() {
+    Map<String, Integer> result = routeController.mapByTime(
+        routeController.getDateTimeFormatter(TimeSteps.MONTH),
+        QuantitiveValue.FLIGHTS,
+        routes.subList(0, 5));
+
+
+    Map<String, Integer> check = new HashMap<>();
+    check.put("January", 3);
+    check.put("February", 1);
+    check.put("March", 1);
+
+    assertEquals(check, result);
+  }
+
+  @Test
+  public void mapByTimeYear() {
+    Map<String, Integer> result = routeController.mapByTime(
+        routeController.getDateTimeFormatter(TimeSteps.YEAR),
+        QuantitiveValue.FLIGHTS,
+        routes.subList(0, 7));
+
+
+    Map<String, Integer> check = new HashMap<>();
+    check.put("2014", 5);
+    check.put("2015", 1);
+    check.put("2016", 1);
+
+    assertEquals(check, result);
+  }
+
+  @Test
+  public void mapToQuant(){
+
+    Map<String, List<Route>> routeMap = new HashMap<>();
+    //Detroit
+    List<Route> detroitRoutes = new ArrayList<>();
+    detroitRoutes.add(routes.get(0));
+    detroitRoutes.add(routes.get(4));
+    routeMap.put("Detroit", detroitRoutes);
+
+    List<Route> sanFranRoutes = new ArrayList<>();
+    sanFranRoutes.add(routes.get(1));
+    sanFranRoutes.add(routes.get(5));
+    routeMap.put("SanFrancisco", sanFranRoutes);
+
+    List<Route> newYorkRoutes = new ArrayList<>();
+    newYorkRoutes.add(routes.get(2));
+    newYorkRoutes.add(routes.get(3));
+    newYorkRoutes.add(routes.get(6));
+    routeMap.put("NewYork", newYorkRoutes);
+
+
+    Map<String, Integer> result = routeController.mapToQuantitive(
+        routeController.getDateTimeFormatter(TimeSteps.MONTH),
+        QuantitiveValue.FLIGHTS,
+        routeMap);
+
+
+    Map<String, Integer> check = new HashMap<>();
+    check.put("Detroit", 2);
+    check.put("SanFrancisco", 2);
+    check.put("NewYork", 3);
+
+    assertEquals(check, result);
+
+
+  }
+
+
+  @Before
+  public void setUp() {
+    routeRepository.deleteAll();
+    cityRepository.deleteAll();
+    airlineRepository.deleteAll();
+
+    Airline airberlin = new Airline("AirBerlin", "XXX");
+    Airline lufthansa = new Airline("Lufthansa", "YYY");
+
+    airlineRepository.save(airberlin);
+    airlineRepository.save(lufthansa);
+
+    City newYork = new City("NewYork", "NNN");
+    City detroit = new City("Detroit", "DDD");
+    City sanFran = new City("SanFrancisco", "SSS");
+
+    cityRepository.save(newYork);
+    cityRepository.save(detroit);
+    cityRepository.save(sanFran);
+
+    dateParser = new SimpleDateFormat("yyyy-MM-dd");
+
+    Date firstJan14;
+    Date secondJan14;
+    Date thirdJan14;
+    Date firstFeb14;
+    Date firstMar14;
+    Date firstJan15;
+    Date firstJan16;
+    try {
+
+      firstJan14 = dateParser.parse("2014-01-01");
+      secondJan14 = dateParser.parse("2014-01-02");
+      thirdJan14 = dateParser.parse("2014-01-03");
+      firstFeb14 = dateParser.parse("2014-02-01");
+      firstMar14 = dateParser.parse("2014-03-01");
+      firstJan15 = dateParser.parse("2015-01-01");
+      firstJan16 = dateParser.parse("2016-01-01");
+
+    } catch (ParseException e) {
+      throw new AssertionError("Error on Date parsing");
+    }
+
+    //0
+    routes.add(Route.builder()
+        .airline(airberlin)
+        .source(newYork)
+        .destination(detroit)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(firstJan14)
+        .build()
+    );
+    //1
+    routes.add(Route.builder()
+        .airline(lufthansa)
+        .source(newYork)
+        .destination(sanFran)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(secondJan14)
+        .build()
+    );
+    //2
+    routes.add(Route.builder()
+        .airline(airberlin)
+        .source(detroit)
+        .destination(newYork)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(thirdJan14)
+        .build()
+    );
+    //3
+    routes.add(Route.builder()
+        .airline(lufthansa)
+        .source(sanFran)
+        .destination(newYork)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(firstFeb14)
+        .build()
+    );
+    //4
+    routes.add(Route.builder()
+        .airline(airberlin)
+        .source(newYork)
+        .destination(detroit)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(firstMar14)
+        .build()
+    );
+    //5
+    routes.add(Route.builder()
+        .airline(lufthansa)
+        .source(newYork)
+        .destination(sanFran)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(firstJan15)
+        .build()
+    );
+    //6
+    routes.add(Route.builder()
+        .airline(airberlin)
+        .source(sanFran)
+        .destination(newYork)
+        .cancelled(1)
+        .delays(1)
+        .flightCount(1)
+        .passengerCount(1)
+        .date(firstJan16)
+        .build()
+    );
+
+    routeRepository.save(routes);
+  }
+
+  @After
+  public void tearDown() {
+    routes.clear();
   }
 
 }
