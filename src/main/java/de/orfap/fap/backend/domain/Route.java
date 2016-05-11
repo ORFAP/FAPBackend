@@ -56,11 +56,11 @@ public class Route extends BaseEntity {
   @ManyToOne
   @NotNull
   @NonNull
-  City source;
+  Market source;
 
   @ManyToOne
   @NotNull
   @NonNull
-  City destination;
+  Market destination;
 
 }

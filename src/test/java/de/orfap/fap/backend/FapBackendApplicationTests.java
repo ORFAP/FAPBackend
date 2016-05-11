@@ -2,12 +2,12 @@ package de.orfap.fap.backend;
 
 import de.orfap.fap.backend.controller.RouteController;
 import de.orfap.fap.backend.domain.Airline;
-import de.orfap.fap.backend.domain.City;
+import de.orfap.fap.backend.domain.Market;
 import de.orfap.fap.backend.domain.QuantitiveValue;
 import de.orfap.fap.backend.domain.Route;
 import de.orfap.fap.backend.domain.TimeSteps;
 import de.orfap.fap.backend.repositories.AirlineRepository;
-import de.orfap.fap.backend.repositories.CityRepository;
+import de.orfap.fap.backend.repositories.MarketRepository;
 import de.orfap.fap.backend.repositories.RouteRepository;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.After;
@@ -43,7 +43,7 @@ public class FapBackendApplicationTests {
   @Autowired
   RouteRepository routeRepository;
   @Autowired
-  CityRepository cityRepository;
+  MarketRepository cityRepository;
   @Autowired
   AirlineRepository airlineRepository;
 
@@ -247,9 +247,9 @@ public class FapBackendApplicationTests {
     airlineRepository.save(airberlin);
     airlineRepository.save(lufthansa);
 
-    City newYork = new City("NewYork", "NNN");
-    City detroit = new City("Detroit", "DDD");
-    City sanFran = new City("SanFrancisco", "SSS");
+    Market newYork = new Market("NewYork", "NNN");
+    Market detroit = new Market("Detroit", "DDD");
+    Market sanFran = new Market("SanFrancisco", "SSS");
 
     cityRepository.save(newYork);
     cityRepository.save(detroit);
