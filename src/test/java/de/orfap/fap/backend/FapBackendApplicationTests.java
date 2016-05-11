@@ -27,12 +27,15 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = FapBackendApplication.class)
 @WebAppConfiguration
+@IntegrationTest("server.port:0")
 public class FapBackendApplicationTests {
 
   private List<Route> routes = new ArrayList<>();
 
   RouteController routeController = new RouteController();
 
+  @Value("${local.server.port}")
+  private int serverPort;
 
   @Test
   public void mapByAirline() {
@@ -279,6 +282,8 @@ public class FapBackendApplicationTests {
         .date(firstJan16)
         .build()
     );
+
+    RestAssured.port = serverPort;
   }
 
   @After
