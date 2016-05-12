@@ -57,7 +57,7 @@ public class FapBackendApplicationTests {
     List<Route> result = routeRepository.findByDateBetweenAirportDestination(
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
-        Collections.singletonList("Lufthansa"),
+        Collections.singletonList("LLL"),
         Collections.EMPTY_LIST
     );
 
@@ -72,7 +72,7 @@ public class FapBackendApplicationTests {
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
         Collections.EMPTY_LIST,
-        Collections.singletonList("NewYork")
+        Collections.singletonList("NNN")
     );
 
     assertThat(result,
@@ -85,8 +85,8 @@ public class FapBackendApplicationTests {
     List<Route> result = routeRepository.findByDateBetweenAirportDestination(
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
-        Collections.singletonList("AirBerlin"),
-        Collections.singletonList("Detroit")
+        Collections.singletonList("AAA"),
+        Collections.singletonList("DDD")
     );
 
     assertThat(result,
@@ -241,8 +241,8 @@ public class FapBackendApplicationTests {
     cityRepository.deleteAll();
     airlineRepository.deleteAll();
 
-    Airline airberlin = new Airline("AirBerlin", "XXX");
-    Airline lufthansa = new Airline("Lufthansa", "YYY");
+    Airline airberlin = new Airline("AirBerlin", "AAA");
+    Airline lufthansa = new Airline("Lufthansa", "LLL");
 
     airlineRepository.save(airberlin);
     airlineRepository.save(lufthansa);

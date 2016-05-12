@@ -24,18 +24,18 @@ public interface RouteRepository extends CrudRepository<Route, UUID> {
   //FindBy Methods
   // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
 
-  List<Route> findByDateBetweenAndAirline_NameInAndDestination_NameIn(
+  List<Route> findByDateBetweenAndAirline_IdInAndDestination_IdIn(
       @Param("start")Date start,
       @Param("end")Date end,
       @Param("airports") List<String> airports,
       @Param("destinations") List<String> destinations);
 
-  List<Route> findByDateBetweenAndAirline_NameIn(
+  List<Route> findByDateBetweenAndAirline_IdIn(
       @Param("start")Date start,
       @Param("end")Date end,
       @Param("airports") List<String> airports);
 
-  List<Route> findByDateBetweenAndDestination_NameIn(
+  List<Route> findByDateBetweenAndDestination_IdIn(
       @Param("start")Date start,
       @Param("end")Date end,
       @Param("destinations") List<String> destinations);
@@ -53,11 +53,11 @@ public interface RouteRepository extends CrudRepository<Route, UUID> {
     if (airports.isEmpty() && destinations.isEmpty())
       return findByDateBetween(start,end);
     else if (airports.isEmpty())
-      return findByDateBetweenAndDestination_NameIn(start, end, destinations);
+      return findByDateBetweenAndDestination_IdIn(start, end, destinations);
     else if ((destinations.isEmpty()))
-      return findByDateBetweenAndAirline_NameIn(start, end, airports);
+      return findByDateBetweenAndAirline_IdIn(start, end, airports);
     else
-      return findByDateBetweenAndAirline_NameInAndDestination_NameIn(
+      return findByDateBetweenAndAirline_IdInAndDestination_IdIn(
           start, end, airports, destinations
       );
   }
