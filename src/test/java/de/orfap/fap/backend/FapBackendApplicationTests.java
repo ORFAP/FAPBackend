@@ -22,11 +22,13 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -111,7 +113,7 @@ public class FapBackendApplicationTests {
   public void mapByAirline() {
     Map<String, List<Route>> result = routeController.mapByAirline(routes.subList(0, 3));
 
-    HashMap<String, List<Route>> check = new HashMap<>();
+    Map<String, List<Route>> check = new TreeMap<>();
     //Airberlin
     List<Route> airberlinRoutes = new ArrayList<>();
     airberlinRoutes.add(routes.get(0));
@@ -130,7 +132,7 @@ public class FapBackendApplicationTests {
   public void mapByDestination() {
     Map<String, List<Route>> result = routeController.mapByDestination(routes.subList(0, 3));
 
-    HashMap<String, List<Route>> check = new HashMap<>();
+    Map<String, List<Route>> check = new TreeMap<>();
     //Detroit
     List<Route> detroitRoutes = new ArrayList<>();
     detroitRoutes.add(routes.get(0));
@@ -150,54 +152,54 @@ public class FapBackendApplicationTests {
 
   @Test
   public void mapByTimeDay() {
-    Map<String, Double> result = routeController.mapByTime(
+    Map<String, List<Double>> result = routeController.mapByTime(
         routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 3));
 
 
-    Map<String, Double> check = new HashMap<>();
-    check.put("Wednesday", 1.0);
-    check.put("Thursday", 1.0);
-    check.put("Friday", 1.0);
+    Map<String, List<Double>> check = new HashMap<>();
+    check.put("Wednesday", Collections.singletonList(1.0));
+    check.put("Thursday", Collections.singletonList(1.0));
+    check.put("Friday", Collections.singletonList(1.0));
 
     assertEquals(check, result);
   }
 
   @Test
   public void mapByTimeMonth() {
-    Map<String, Double> result = routeController.mapByTime(
+    Map<String, List<Double>> result = routeController.mapByTime(
         routeController.getDateTimeFormatter(TimeSteps.MONTH),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 5));
 
 
-    Map<String, Double> check = new HashMap<>();
-    check.put("January", 3.0);
-    check.put("February", 1.0);
-    check.put("March", 1.0);
+    Map<String, List<Double>> check = new HashMap<>();
+    check.put("January", Collections.singletonList(3.0));
+    check.put("February", Collections.singletonList(1.0));
+    check.put("March", Collections.singletonList(1.0));
 
     assertEquals(check, result);
   }
 
   @Test
   public void mapByTimeYear() {
-    Map<String, Double> result = routeController.mapByTime(
+    Map<String, List<Double>> result = routeController.mapByTime(
         routeController.getDateTimeFormatter(TimeSteps.YEAR),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 7));
 
 
-    Map<String, Double> check = new HashMap<>();
-    check.put("2014", 5.0);
-    check.put("2015", 1.0);
-    check.put("2016", 1.0);
+    Map<String, List<Double>> check = new HashMap<>();
+    check.put("2014", Collections.singletonList(5.0));
+    check.put("2015", Collections.singletonList(1.0));
+    check.put("2016", Collections.singletonList(1.0));
 
     assertEquals(check, result);
   }
 
   @Test
-  public void mapToQuant(){
+  public void mapToQuantYear(){
 
     Map<String, List<Route>> routeMap = new HashMap<>();
     //Detroit
@@ -218,16 +220,144 @@ public class FapBackendApplicationTests {
     routeMap.put("NewYork", newYorkRoutes);
 
 
-    Map<String, Double> result = routeController.mapToQuantitive(
-        routeController.getDateTimeFormatter(TimeSteps.MONTH),
+    SimpleDateFormat formatter = routeController.getDateTimeFormatter(TimeSteps.YEAR);
+    List<Date> keys = new ArrayList<>();
+    try {
+      keys.add(formatter.parse("2014"));
+      keys.add(formatter.parse("2015"));
+      keys.add(formatter.parse("2016"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+
+    Map<String, List<Double>> result = routeController.mapToQuantitive(
+        routeController.getDateTimeFormatter(TimeSteps.YEAR),
         QuantitiveValue.FLIGHTS,
+        keys,
         routeMap);
 
 
-    Map<String, Double> check = new HashMap<>();
-    check.put("Detroit", 2.0);
-    check.put("SanFrancisco", 2.0);
-    check.put("NewYork", 3.0);
+    Map<String, List<Double>> check = new TreeMap<>();
+    check.put("Detroit", Arrays.asList(2.0,0.0,0.0));
+    check.put("SanFrancisco", Arrays.asList(1.0,1.0,0.0));
+    check.put("NewYork", Arrays.asList(2.0,0.0,1.0));
+
+    assertEquals(check, result);
+
+
+  }
+
+  @Test
+  public void mapToQuantMonth(){
+
+    Map<String, List<Route>> routeMap = new HashMap<>();
+    //Detroit
+    List<Route> detroitRoutes = new ArrayList<>();
+    detroitRoutes.add(routes.get(0));
+    detroitRoutes.add(routes.get(4));
+    routeMap.put("Detroit", detroitRoutes);
+
+    List<Route> sanFranRoutes = new ArrayList<>();
+    sanFranRoutes.add(routes.get(1));
+    sanFranRoutes.add(routes.get(5));
+    routeMap.put("SanFrancisco", sanFranRoutes);
+
+    List<Route> newYorkRoutes = new ArrayList<>();
+    newYorkRoutes.add(routes.get(2));
+    newYorkRoutes.add(routes.get(3));
+    newYorkRoutes.add(routes.get(6));
+    routeMap.put("NewYork", newYorkRoutes);
+
+
+    SimpleDateFormat formatter = routeController.getDateTimeFormatter(TimeSteps.MONTH);
+    List<Date> keys = new ArrayList<>();
+    try {
+      keys.add(formatter.parse("January"));
+      keys.add(formatter.parse("February"));
+      keys.add(formatter.parse("March"));
+      keys.add(formatter.parse("April"));
+      keys.add(formatter.parse("May"));
+      keys.add(formatter.parse("June"));
+      keys.add(formatter.parse("July"));
+      keys.add(formatter.parse("August"));
+      keys.add(formatter.parse("September"));
+      keys.add(formatter.parse("October"));
+      keys.add(formatter.parse("November"));
+      keys.add(formatter.parse("December"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+
+    Map<String, List<Double>> result = routeController.mapToQuantitive(
+        routeController.getDateTimeFormatter(TimeSteps.MONTH),
+        QuantitiveValue.FLIGHTS,
+        keys,
+        routeMap);
+
+
+    Map<String, List<Double>> check = new TreeMap<>();
+    check.put("Detroit", Arrays.asList(1.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0));
+    check.put("SanFrancisco", Arrays.asList(2.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0));
+    check.put("NewYork", Arrays.asList(2.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0));
+
+    assertEquals(check, result);
+
+
+  }
+
+  @Test
+  public void mapToQuantDayOfWeek(){
+
+    Map<String, List<Route>> routeMap = new HashMap<>();
+    //Detroit
+    List<Route> detroitRoutes = new ArrayList<>();
+    detroitRoutes.add(routes.get(0));
+    detroitRoutes.add(routes.get(4));
+    routeMap.put("Detroit", detroitRoutes);
+
+    List<Route> sanFranRoutes = new ArrayList<>();
+    sanFranRoutes.add(routes.get(1));
+    sanFranRoutes.add(routes.get(5));
+    routeMap.put("SanFrancisco", sanFranRoutes);
+
+    List<Route> newYorkRoutes = new ArrayList<>();
+    newYorkRoutes.add(routes.get(2));
+    newYorkRoutes.add(routes.get(3));
+    newYorkRoutes.add(routes.get(6));
+    routeMap.put("NewYork", newYorkRoutes);
+
+
+    SimpleDateFormat formatter = routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK);
+    List<Date> keys = new ArrayList<>();
+    try {
+      keys.add(formatter.parse("Monday"));
+      keys.add(formatter.parse("Tuesday"));
+      keys.add(formatter.parse("Wednesday"));
+      keys.add(formatter.parse("Thursday"));
+      keys.add(formatter.parse("Friday"));
+      keys.add(formatter.parse("Saturday"));
+      keys.add(formatter.parse("Sunday"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+
+    Map<String, List<Double>> result = routeController.mapToQuantitive(
+        routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK),
+        QuantitiveValue.FLIGHTS,
+        keys,
+        routeMap);
+
+
+    Map<String, List<Double>> check = new TreeMap<>();
+    check.put("Detroit", Arrays.asList(0.0,0.0,1.0,0.0,0.0,1.0,0.0));
+    check.put("SanFrancisco", Arrays.asList(0.0,0.0,0.0,2.0,0.0,0.0,0.0));
+    check.put("NewYork", Arrays.asList(0.0,0.0,0.0,0.0,2.0,1.0,0.0));
 
     assertEquals(check, result);
 
