@@ -43,7 +43,7 @@ public class RouteController {
 
   @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
-  public Map<String, Integer> filter(@RequestBody Setting setting) {
+  public Map<String, Double> filter(@RequestBody Setting setting) {
 
     checkSetting(setting);
 
@@ -92,7 +92,7 @@ public class RouteController {
       throw new AssertionError("Filter should not be null!");
   }
 
-  public Map<String, Integer> mapByTime(
+  public Map<String, Double> mapByTime(
       SimpleDateFormat timeFormat,
       QuantitiveValue quant, List<Route> routes) {
 
@@ -108,7 +108,7 @@ public class RouteController {
           }
         })
         .collect(Collectors.groupingBy(route -> timeFormat.format(route.getDate()),
-            Collectors.summingInt(route -> getQuant(quant, route))
+            Collectors.summingDouble(route -> getQuant(quant, route))
             )
         );
   }
@@ -131,10 +131,10 @@ public class RouteController {
 
   }
 
-  public Map<String, Integer> mapToQuantitive(
+  public Map<String, Double> mapToQuantitive(
       SimpleDateFormat timeFormat, QuantitiveValue quant, Map<String, List<Route>> routeMap) {
 
-    Map<String, Integer> result = new HashMap<>();
+    Map<String, Double> result = new HashMap<>();
 
     //Map to quantity for each key
     for (String key : routeMap.keySet()) {
@@ -154,9 +154,9 @@ public class RouteController {
               Collectors.mapping(route -> route, Collectors.toList())));
 
       //Strip to one value
-      Integer value = dateMap.entrySet().stream()
+      Double value = dateMap.entrySet().stream()
           .sorted(Map.Entry.comparingByKey())
-          .mapToInt(e -> e.getValue().stream().mapToInt(route -> getQuant(quant, route)).sum())
+          .mapToDouble(e -> e.getValue().stream().mapToDouble(route -> getQuant(quant, route)).sum())
           .sum();
 
       result.put(key, value);
@@ -165,7 +165,7 @@ public class RouteController {
     return result;
   }
 
-  public int getQuant(QuantitiveValue quant, Route route) {
+  public double getQuant(QuantitiveValue quant, Route route) {
     switch (quant) {
 
       case FLIGHTS:

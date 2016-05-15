@@ -150,48 +150,48 @@ public class FapBackendApplicationTests {
 
   @Test
   public void mapByTimeDay() {
-    Map<String, Integer> result = routeController.mapByTime(
+    Map<String, Double> result = routeController.mapByTime(
         routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 3));
 
 
-    Map<String, Integer> check = new HashMap<>();
-    check.put("Wednesday", 1);
-    check.put("Thursday", 1);
-    check.put("Friday", 1);
+    Map<String, Double> check = new HashMap<>();
+    check.put("Wednesday", 1.0);
+    check.put("Thursday", 1.0);
+    check.put("Friday", 1.0);
 
     assertEquals(check, result);
   }
 
   @Test
   public void mapByTimeMonth() {
-    Map<String, Integer> result = routeController.mapByTime(
+    Map<String, Double> result = routeController.mapByTime(
         routeController.getDateTimeFormatter(TimeSteps.MONTH),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 5));
 
 
-    Map<String, Integer> check = new HashMap<>();
-    check.put("January", 3);
-    check.put("February", 1);
-    check.put("March", 1);
+    Map<String, Double> check = new HashMap<>();
+    check.put("January", 3.0);
+    check.put("February", 1.0);
+    check.put("March", 1.0);
 
     assertEquals(check, result);
   }
 
   @Test
   public void mapByTimeYear() {
-    Map<String, Integer> result = routeController.mapByTime(
+    Map<String, Double> result = routeController.mapByTime(
         routeController.getDateTimeFormatter(TimeSteps.YEAR),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 7));
 
 
-    Map<String, Integer> check = new HashMap<>();
-    check.put("2014", 5);
-    check.put("2015", 1);
-    check.put("2016", 1);
+    Map<String, Double> check = new HashMap<>();
+    check.put("2014", 5.0);
+    check.put("2015", 1.0);
+    check.put("2016", 1.0);
 
     assertEquals(check, result);
   }
@@ -218,16 +218,16 @@ public class FapBackendApplicationTests {
     routeMap.put("NewYork", newYorkRoutes);
 
 
-    Map<String, Integer> result = routeController.mapToQuantitive(
+    Map<String, Double> result = routeController.mapToQuantitive(
         routeController.getDateTimeFormatter(TimeSteps.MONTH),
         QuantitiveValue.FLIGHTS,
         routeMap);
 
 
-    Map<String, Integer> check = new HashMap<>();
-    check.put("Detroit", 2);
-    check.put("SanFrancisco", 2);
-    check.put("NewYork", 3);
+    Map<String, Double> check = new HashMap<>();
+    check.put("Detroit", 2.0);
+    check.put("SanFrancisco", 2.0);
+    check.put("NewYork", 3.0);
 
     assertEquals(check, result);
 
