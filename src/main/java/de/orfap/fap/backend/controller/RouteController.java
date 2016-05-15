@@ -116,14 +116,7 @@ public class RouteController {
     //Sort by Date and sum values
     return routes
         .stream()
-        .peek(route -> {
-          //Normalize date of route to timeStep
-          try {
-            route.setDate(timeFormat.parse(timeFormat.format(route.getDate())));
-          } catch (ParseException e) {
-            throw new AssertionError("Date Parse Error");
-          }
-        })
+        .peek(route -> normalizeDate(timeFormat, route))
         .sorted((r1, r2) -> r1.getDate().compareTo(r2.getDate()))
         .collect(Collectors.groupingBy(route -> timeFormat.format(route.getDate()),
             Collectors.collectingAndThen(
@@ -163,14 +156,7 @@ public class RouteController {
       //Sort by Date
       Map<Date, List<Route>> dateMap = routeMap.get(key)
           .stream()
-          .peek(route -> {
-            //Normalize date of route to timeStep
-            try {
-              route.setDate(timeFormat.parse(timeFormat.format(route.getDate())));
-            } catch (ParseException e) {
-              throw new AssertionError("Date Parse Error");
-            }
-          })
+          .peek(route -> normalizeDate(timeFormat, route))
           .collect(Collectors.groupingBy(Route::getDate,
               Collectors.mapping(route -> route, Collectors.toList())));
 
@@ -187,6 +173,18 @@ public class RouteController {
     }
 
     return result;
+  }
+
+  private void normalizeDate(SimpleDateFormat timeFormat, Route route) {
+
+    //Normalize date of route to timeStep
+    try {
+      Date date = timeFormat.parse(timeFormat.format(route.getDate()));
+
+      route.setDate(date);
+    } catch (ParseException e) {
+      throw new AssertionError("Date Parse Error");
+    }
   }
 
   public double getQuant(QuantitiveValue quant, Route route) {
@@ -211,11 +209,7 @@ public class RouteController {
     switch (timeStep) {
 
       case DAY_OF_WEEK:
-        SimpleDateFormat format = new SimpleDateFormat("EEEE", Locale.US);
-        Calendar calendar = Calendar.getInstance(Locale.US);
-        calendar.set(1970,Calendar.JANUARY,5);
-        format.setCalendar(calendar);
-        return format;
+        return new SimpleDateFormat("EEEE", Locale.US);
       case MONTH:
         return new SimpleDateFormat("MMMM", Locale.US);
       case YEAR:
@@ -230,7 +224,7 @@ public class RouteController {
 
     List<Date> result = new ArrayList<>();
 
-    Calendar calendar = Calendar.getInstance();
+    Calendar calendar = Calendar.getInstance(Locale.US);
 
     //Init Steps
     int calendarStep = 0;
