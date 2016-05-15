@@ -37,16 +37,16 @@ public class Route extends BaseEntity {
   Date date;
 
   @Min(0)
-  int delays;
+  double delays;
 
   @Min(0)
-  int cancelled;
+  double cancelled;
 
   @Min(0)
-  int passengerCount;
+  double passengerCount;
 
   @Min(0)
-  int flightCount;
+  double flightCount;
 
   @ManyToOne
   @NotNull
