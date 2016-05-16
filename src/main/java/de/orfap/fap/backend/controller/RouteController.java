@@ -15,14 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +38,7 @@ public class RouteController {
 
   @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
-  public Map<String, List<Double>> filter(@RequestBody Setting setting) {
+  public FilterResponse filter(@RequestBody Setting setting) {
 
     checkSetting(setting);
 
@@ -61,7 +54,7 @@ public class RouteController {
     DateNormalizer dateNormalizer = new DateNormalizer(setting.getFilter().getTimestep());
 
     //Set up keys if necessary
-    List<Date> keys = null;
+    Set<Date> keys;
     if (setting.getAxis().getX() != QualitiativeValue.TIME) {
       keys = getDateRangeKeys(
           setting.getRangeFrom(),
@@ -69,33 +62,41 @@ public class RouteController {
           setting.getFilter().getTimestep(),
           dateNormalizer
       );
+    } else {
+      keys = new HashSet<>();
     }
+
+    Map<String, List<Double>> data = null;
 
     //Compute result
     switch (setting.getAxis().getX()) {
       case TIME:
-        return mapByTime(
+        data = mapByTime(
             dateNormalizer,
             setting.getAxis().getY(),
             routes);
 
       case DESTINATION:
-        return mapToQuantitive(
+        data = mapToQuantitive(
             dateNormalizer,
             setting.getAxis().getY(),
             keys,
             mapByDestination(routes));
 
       case AIRLINE:
-        return mapToQuantitive(
+        data = mapToQuantitive(
             dateNormalizer,
             setting.getAxis().getY(),
             keys,
             mapByAirline(routes));
-
-      default:
-        return null;
     }
+
+    return FilterResponse.builder()
+        .data(data)
+        .x(keys.stream().map(dateNormalizer::format).collect(Collectors.toList()))
+        .y(setting.getAxis().getY())
+        .z(setting.getAxis().getX())
+        .build();
   }
 
   private void checkSetting(@NonNull Setting setting) {
@@ -144,7 +145,7 @@ public class RouteController {
   }
 
   public Map<String, List<Double>> mapToQuantitive(
-      DateNormalizer dateNormalizer, QuantitiveValue quant, List<Date> keys, Map<String, List<Route>> routeMap) {
+      DateNormalizer dateNormalizer, QuantitiveValue quant, Set<Date> keys, Map<String, List<Route>> routeMap) {
 
     Map<String, List<Double>> result = new TreeMap<>();
 
@@ -191,9 +192,9 @@ public class RouteController {
     }
   }
 
-  private List<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, DateNormalizer dateNormalizer) {
+  public Set<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, DateNormalizer dateNormalizer) {
 
-    List<Date> result = new ArrayList<>();
+    Set<Date> result = new HashSet<>();
 
     Calendar calendar = Calendar.getInstance(Locale.US);
 
@@ -211,13 +212,17 @@ public class RouteController {
         break;
     }
 
-    //Init start date
-    calendar.setTime(dateNormalizer.normalizeDate(rangeFrom));
+    //Init start
+    calendar.setTime(rangeFrom);
+
+    //Normalize start day for year and months
+    if(timestep != TimeSteps.DAY_OF_WEEK)
+      calendar.set(Calendar.DAY_OF_MONTH, 1);
 
     //Save Keys into List
     while (calendar.getTime().before(rangeTo)) {
 
-      result.add(calendar.getTime());
+      result.add(dateNormalizer.normalizeDate(calendar.getTime()));
 
       calendar.add(calendarStep, 1);
     }
