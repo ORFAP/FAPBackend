@@ -121,11 +121,12 @@ public class RouteController {
         .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
         .sorted((r1, r2) -> r1.getDate().compareTo(r2.getDate()))
         .collect(Collectors.groupingBy(route -> dateNormalizer.format(route.getDate()),
+            LinkedHashMap::new,
             Collectors.collectingAndThen(
                 Collectors.summingDouble(route -> getQuant(quant, route)),
                 Collections::singletonList
             )
-            )
+          )
         );
   }
 
