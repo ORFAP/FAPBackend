@@ -75,6 +75,7 @@ public class RouteController {
             dateNormalizer,
             setting.getAxis().getY(),
             routes);
+        break;
 
       case DESTINATION:
         data = mapToQuantitive(
@@ -82,6 +83,7 @@ public class RouteController {
             setting.getAxis().getY(),
             keys,
             mapByDestination(routes));
+        break;
 
       case AIRLINE:
         data = mapToQuantitive(
@@ -89,11 +91,12 @@ public class RouteController {
             setting.getAxis().getY(),
             keys,
             mapByAirline(routes));
+        break;
     }
 
     return FilterResponse.builder()
         .data(data)
-        .x(keys.stream().map(dateNormalizer::format).collect(Collectors.toList()))
+        .x(keys.stream().sorted().map(dateNormalizer::format).collect(Collectors.toList()))
         .y(setting.getAxis().getY())
         .z(setting.getAxis().getX())
         .build();
