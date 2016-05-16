@@ -1,6 +1,5 @@
 package de.orfap.fap.backend.controller;
 
-import de.orfap.fap.backend.domain.QualitiativeValue;
 import de.orfap.fap.backend.domain.QuantitiveValue;
 import de.orfap.fap.backend.domain.Route;
 import de.orfap.fap.backend.domain.Setting;
@@ -54,17 +53,12 @@ public class RouteController {
     DateNormalizer dateNormalizer = new DateNormalizer(setting.getFilter().getTimestep());
 
     //Set up keys if necessary
-    Set<Date> keys;
-    if (setting.getAxis().getX() != QualitiativeValue.TIME) {
-      keys = getDateRangeKeys(
-          setting.getRangeFrom(),
-          setting.getRangeTo(),
-          setting.getFilter().getTimestep(),
-          dateNormalizer
-      );
-    } else {
-      keys = new HashSet<>();
-    }
+    Set<Date> keys = getDateRangeKeys(
+        setting.getRangeFrom(),
+        setting.getRangeTo(),
+        setting.getFilter().getTimestep(),
+        dateNormalizer
+    );
 
     Map<String, List<Double>> data = null;
 
@@ -74,7 +68,9 @@ public class RouteController {
         data = mapByTime(
             dateNormalizer,
             setting.getAxis().getY(),
+            keys,
             routes);
+        keys = new HashSet<>();
         break;
 
       case DESTINATION:
@@ -113,21 +109,31 @@ public class RouteController {
 
   public Map<String, List<Double>> mapByTime(
       DateNormalizer dateNormalizer,
-      QuantitiveValue quant, List<Route> routes) {
+      QuantitiveValue quant, Set<Date> keys, List<Route> routes) {
 
     //Sort by Date and sum values
-    return routes
+    Map<Date, List<Double>> dateMap = routes
         .stream()
         .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
-        .sorted((r1, r2) -> r1.getDate().compareTo(r2.getDate()))
-        .collect(Collectors.groupingBy(route -> dateNormalizer.format(route.getDate()),
-            LinkedHashMap::new,
+        .collect(Collectors.groupingBy(Route::getDate,
             Collectors.collectingAndThen(
                 Collectors.summingDouble(route -> getQuant(quant, route)),
                 Collections::singletonList
             )
-          )
+            )
         );
+
+    //Insert missing keys
+    keys.forEach(keyValue -> dateMap.putIfAbsent(keyValue, new ArrayList<>()));
+
+    return dateMap.entrySet().stream()
+        .sorted(Map.Entry.comparingByKey())
+        .collect(Collectors.toMap(entry -> dateNormalizer.format(entry.getKey()),
+            Map.Entry::getValue,
+            (key1, key2) -> key1,
+            LinkedHashMap::new
+        ));
+
   }
 
   public Map<String, List<Route>> mapByAirline(List<Route> routes) {
@@ -220,7 +226,7 @@ public class RouteController {
     calendar.setTime(rangeFrom);
 
     //Normalize start day for year and months
-    if(timestep != TimeSteps.DAY_OF_WEEK)
+    if (timestep != TimeSteps.DAY_OF_WEEK)
       calendar.set(Calendar.DAY_OF_MONTH, 1);
 
     //Save Keys into List

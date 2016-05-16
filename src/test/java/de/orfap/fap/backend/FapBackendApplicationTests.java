@@ -146,9 +146,22 @@ public class FapBackendApplicationTests {
 
   @Test
   public void mapByTimeDay() {
+
+    DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.DAY_OF_WEEK);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(dateNormalizer.parse("Wednesday"));
+      keys.add(dateNormalizer.parse("Thursday"));
+      keys.add(dateNormalizer.parse("Friday"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
     Map<String, List<Double>> result = routeController.mapByTime(
         new DateNormalizer(TimeSteps.DAY_OF_WEEK),
         QuantitiveValue.FLIGHTS,
+        keys,
         routes.subList(0, 3));
 
 
@@ -164,9 +177,20 @@ public class FapBackendApplicationTests {
 
   @Test
   public void mapByTimeMonth() {
+    SimpleDateFormat formatter = new SimpleDateFormat("MMMM", Locale.US);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(formatter.parse("January"));
+      keys.add(formatter.parse("February"));
+      keys.add(formatter.parse("March"));
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
     Map<String, List<Double>> result = routeController.mapByTime(
         new DateNormalizer(TimeSteps.MONTH),
         QuantitiveValue.FLIGHTS,
+        keys,
         routes.subList(0, 5));
 
 
@@ -180,9 +204,21 @@ public class FapBackendApplicationTests {
 
   @Test
   public void mapByTimeYear() {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy", Locale.US);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(formatter.parse("2014"));
+      keys.add(formatter.parse("2015"));
+      keys.add(formatter.parse("2016"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
     Map<String, List<Double>> result = routeController.mapByTime(
         new DateNormalizer(TimeSteps.YEAR),
         QuantitiveValue.FLIGHTS,
+        keys,
         routes.subList(0, 7));
 
 
