@@ -198,7 +198,7 @@ public class RouteController {
 
   public Set<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, DateNormalizer dateNormalizer) {
 
-    Set<Date> result = new HashSet<>();
+    Set<Date> result = new LinkedHashSet<>();
 
     Calendar calendar = Calendar.getInstance(Locale.US);
 
