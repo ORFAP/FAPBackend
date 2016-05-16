@@ -152,12 +152,14 @@ public class FapBackendApplicationTests {
         routes.subList(0, 3));
 
 
-    Map<String, List<Double>> check = new HashMap<>();
+    Map<String, List<Double>> check = new LinkedHashMap<>();
     check.put("Wednesday", Collections.singletonList(1.0));
     check.put("Thursday", Collections.singletonList(1.0));
     check.put("Friday", Collections.singletonList(1.0));
 
-    assertEquals(check, result);
+
+
+    assertEquals(check.toString(), result.toString());
   }
 
   @Test
@@ -168,12 +170,12 @@ public class FapBackendApplicationTests {
         routes.subList(0, 5));
 
 
-    Map<String, List<Double>> check = new HashMap<>();
+    Map<String, List<Double>> check = new LinkedHashMap<>();
     check.put("January", Collections.singletonList(3.0));
     check.put("February", Collections.singletonList(1.0));
     check.put("March", Collections.singletonList(1.0));
 
-    assertEquals(check, result);
+    assertEquals(check.toString(), result.toString());
   }
 
   @Test
@@ -184,12 +186,12 @@ public class FapBackendApplicationTests {
         routes.subList(0, 7));
 
 
-    Map<String, List<Double>> check = new HashMap<>();
+    Map<String, List<Double>> check = new LinkedHashMap<>();
     check.put("2014", Collections.singletonList(5.0));
     check.put("2015", Collections.singletonList(1.0));
     check.put("2016", Collections.singletonList(1.0));
 
-    assertEquals(check, result);
+    assertEquals(check.toString(), result.toString());
   }
 
   @Test
