@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -60,16 +58,16 @@ public class RouteController {
     );
 
     //SetUp Date
-    SimpleDateFormat timeFormat = getDateTimeFormatter(setting.getFilter().getTimestep());
+    DateNormalizer dateNormalizer = new DateNormalizer(setting.getFilter().getTimestep());
 
     //Set up keys if necessary
     List<Date> keys = null;
-    if(setting.getAxis().getX() != QualitiativeValue.TIME){
+    if (setting.getAxis().getX() != QualitiativeValue.TIME) {
       keys = getDateRangeKeys(
           setting.getRangeFrom(),
           setting.getRangeTo(),
           setting.getFilter().getTimestep(),
-          timeFormat
+          dateNormalizer
       );
     }
 
@@ -77,20 +75,20 @@ public class RouteController {
     switch (setting.getAxis().getX()) {
       case TIME:
         return mapByTime(
-            timeFormat,
+            dateNormalizer,
             setting.getAxis().getY(),
             routes);
 
       case DESTINATION:
         return mapToQuantitive(
-            timeFormat,
+            dateNormalizer,
             setting.getAxis().getY(),
             keys,
             mapByDestination(routes));
 
       case AIRLINE:
         return mapToQuantitive(
-            timeFormat,
+            dateNormalizer,
             setting.getAxis().getY(),
             keys,
             mapByAirline(routes));
@@ -110,19 +108,19 @@ public class RouteController {
   }
 
   public Map<String, List<Double>> mapByTime(
-      SimpleDateFormat timeFormat,
+      DateNormalizer dateNormalizer,
       QuantitiveValue quant, List<Route> routes) {
 
     //Sort by Date and sum values
     return routes
         .stream()
-        .peek(route -> normalizeDate(timeFormat, route))
+        .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
         .sorted((r1, r2) -> r1.getDate().compareTo(r2.getDate()))
-        .collect(Collectors.groupingBy(route -> timeFormat.format(route.getDate()),
+        .collect(Collectors.groupingBy(route -> dateNormalizer.format(route.getDate()),
             Collectors.collectingAndThen(
                 Collectors.summingDouble(route -> getQuant(quant, route)),
                 Collections::singletonList
-              )
+            )
             )
         );
   }
@@ -146,7 +144,7 @@ public class RouteController {
   }
 
   public Map<String, List<Double>> mapToQuantitive(
-      SimpleDateFormat timeFormat, QuantitiveValue quant,List<Date> keys, Map<String, List<Route>> routeMap) {
+      DateNormalizer dateNormalizer, QuantitiveValue quant, List<Date> keys, Map<String, List<Route>> routeMap) {
 
     Map<String, List<Double>> result = new TreeMap<>();
 
@@ -156,7 +154,7 @@ public class RouteController {
       //Sort by Date
       Map<Date, List<Route>> dateMap = routeMap.get(key)
           .stream()
-          .peek(route -> normalizeDate(timeFormat, route))
+          .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
           .collect(Collectors.groupingBy(Route::getDate,
               Collectors.mapping(route -> route, Collectors.toList())));
 
@@ -173,18 +171,6 @@ public class RouteController {
     }
 
     return result;
-  }
-
-  private void normalizeDate(SimpleDateFormat timeFormat, Route route) {
-
-    //Normalize date of route to timeStep
-    try {
-      Date date = timeFormat.parse(timeFormat.format(route.getDate()));
-
-      route.setDate(date);
-    } catch (ParseException e) {
-      throw new AssertionError("Date Parse Error");
-    }
   }
 
   public double getQuant(QuantitiveValue quant, Route route) {
@@ -205,22 +191,7 @@ public class RouteController {
     }
   }
 
-  public SimpleDateFormat getDateTimeFormatter(TimeSteps timeStep) {
-    switch (timeStep) {
-
-      case DAY_OF_WEEK:
-        return new SimpleDateFormat("EEEE", Locale.US);
-      case MONTH:
-        return new SimpleDateFormat("MMMM", Locale.US);
-      case YEAR:
-        return new SimpleDateFormat("yyyy", Locale.US);
-      default:
-        return null;
-    }
-
-  }
-
-  private List<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, SimpleDateFormat timeFormat) {
+  private List<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, DateNormalizer dateNormalizer) {
 
     List<Date> result = new ArrayList<>();
 
@@ -228,24 +199,23 @@ public class RouteController {
 
     //Init Steps
     int calendarStep = 0;
-    switch (timestep){
-      case DAY_OF_WEEK: calendarStep = Calendar.DAY_OF_WEEK;
+    switch (timestep) {
+      case DAY_OF_WEEK:
+        calendarStep = Calendar.DAY_OF_WEEK;
         break;
-      case MONTH: calendarStep = Calendar.MONTH;
+      case MONTH:
+        calendarStep = Calendar.MONTH;
         break;
-      case YEAR: calendarStep = Calendar.YEAR;
+      case YEAR:
+        calendarStep = Calendar.YEAR;
         break;
     }
 
     //Init start date
-    try {
-      calendar.setTime(timeFormat.parse(timeFormat.format(rangeFrom)));
-    } catch (ParseException e) {
-      throw new AssertionError("Date Parse Error");
-    }
+    calendar.setTime(dateNormalizer.normalizeDate(rangeFrom));
 
     //Save Keys into List
-    while (calendar.getTime().before(rangeTo)){
+    while (calendar.getTime().before(rangeTo)) {
 
       result.add(calendar.getTime());
 

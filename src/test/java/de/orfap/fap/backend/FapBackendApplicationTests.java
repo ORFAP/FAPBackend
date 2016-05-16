@@ -1,5 +1,6 @@
 package de.orfap.fap.backend;
 
+import de.orfap.fap.backend.controller.DateNormalizer;
 import de.orfap.fap.backend.controller.RouteController;
 import de.orfap.fap.backend.domain.Airline;
 import de.orfap.fap.backend.domain.Market;
@@ -27,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -153,7 +155,7 @@ public class FapBackendApplicationTests {
   @Test
   public void mapByTimeDay() {
     Map<String, List<Double>> result = routeController.mapByTime(
-        routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK),
+        new DateNormalizer(TimeSteps.DAY_OF_WEEK),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 3));
 
@@ -169,7 +171,7 @@ public class FapBackendApplicationTests {
   @Test
   public void mapByTimeMonth() {
     Map<String, List<Double>> result = routeController.mapByTime(
-        routeController.getDateTimeFormatter(TimeSteps.MONTH),
+        new DateNormalizer(TimeSteps.MONTH),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 5));
 
@@ -185,7 +187,7 @@ public class FapBackendApplicationTests {
   @Test
   public void mapByTimeYear() {
     Map<String, List<Double>> result = routeController.mapByTime(
-        routeController.getDateTimeFormatter(TimeSteps.YEAR),
+        new DateNormalizer(TimeSteps.YEAR),
         QuantitiveValue.FLIGHTS,
         routes.subList(0, 7));
 
@@ -220,7 +222,7 @@ public class FapBackendApplicationTests {
     routeMap.put("NewYork", newYorkRoutes);
 
 
-    SimpleDateFormat formatter = routeController.getDateTimeFormatter(TimeSteps.YEAR);
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy", Locale.US);
     List<Date> keys = new ArrayList<>();
     try {
       keys.add(formatter.parse("2014"));
@@ -233,7 +235,7 @@ public class FapBackendApplicationTests {
 
 
     Map<String, List<Double>> result = routeController.mapToQuantitive(
-        routeController.getDateTimeFormatter(TimeSteps.YEAR),
+        new DateNormalizer(TimeSteps.YEAR),
         QuantitiveValue.FLIGHTS,
         keys,
         routeMap);
@@ -271,7 +273,7 @@ public class FapBackendApplicationTests {
     routeMap.put("NewYork", newYorkRoutes);
 
 
-    SimpleDateFormat formatter = routeController.getDateTimeFormatter(TimeSteps.MONTH);
+    SimpleDateFormat formatter = new SimpleDateFormat("MMMM", Locale.US);
     List<Date> keys = new ArrayList<>();
     try {
       keys.add(formatter.parse("January"));
@@ -293,7 +295,7 @@ public class FapBackendApplicationTests {
 
 
     Map<String, List<Double>> result = routeController.mapToQuantitive(
-        routeController.getDateTimeFormatter(TimeSteps.MONTH),
+        new DateNormalizer(TimeSteps.MONTH),
         QuantitiveValue.FLIGHTS,
         keys,
         routeMap);
@@ -331,16 +333,16 @@ public class FapBackendApplicationTests {
     routeMap.put("NewYork", newYorkRoutes);
 
 
-    SimpleDateFormat formatter = routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK);
+    DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.DAY_OF_WEEK);
     List<Date> keys = new ArrayList<>();
     try {
-      keys.add(formatter.parse("Monday"));
-      keys.add(formatter.parse("Tuesday"));
-      keys.add(formatter.parse("Wednesday"));
-      keys.add(formatter.parse("Thursday"));
-      keys.add(formatter.parse("Friday"));
-      keys.add(formatter.parse("Saturday"));
-      keys.add(formatter.parse("Sunday"));
+      keys.add(dateNormalizer.parse("Monday"));
+      keys.add(dateNormalizer.parse("Tuesday"));
+      keys.add(dateNormalizer.parse("Wednesday"));
+      keys.add(dateNormalizer.parse("Thursday"));
+      keys.add(dateNormalizer.parse("Friday"));
+      keys.add(dateNormalizer.parse("Saturday"));
+      keys.add(dateNormalizer.parse("Sunday"));
 
     } catch (ParseException e) {
       throw new AssertionError("Date parse Error");
@@ -348,7 +350,7 @@ public class FapBackendApplicationTests {
 
 
     Map<String, List<Double>> result = routeController.mapToQuantitive(
-        routeController.getDateTimeFormatter(TimeSteps.DAY_OF_WEEK),
+        dateNormalizer,
         QuantitiveValue.FLIGHTS,
         keys,
         routeMap);
@@ -385,7 +387,7 @@ public class FapBackendApplicationTests {
     cityRepository.save(detroit);
     cityRepository.save(sanFran);
 
-    dateParser = new SimpleDateFormat("yyyy-MM-dd");
+    dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     Date firstJan14;
     Date secondJan14;
