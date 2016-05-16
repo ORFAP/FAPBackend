@@ -1,5 +1,6 @@
 package de.orfap.fap.backend.controller;
 
+import de.orfap.fap.backend.domain.QualitiativeValue;
 import de.orfap.fap.backend.domain.QuantitiveValue;
 import de.orfap.fap.backend.domain.Route;
 import de.orfap.fap.backend.domain.Setting;
@@ -14,13 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,7 +38,7 @@ public class RouteController {
 
   @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
-  public Map<String, Double> filter(@RequestBody Setting setting) {
+  public FilterResponse filter(@RequestBody Setting setting) {
 
     checkSetting(setting);
 
@@ -56,31 +51,55 @@ public class RouteController {
     );
 
     //SetUp Date
-    SimpleDateFormat timeFormat = getDateTimeFormatter(setting.getFilter().getTimestep());
+    DateNormalizer dateNormalizer = new DateNormalizer(setting.getFilter().getTimestep());
+
+    //Set up keys if necessary
+    Set<Date> keys;
+    if (setting.getAxis().getX() != QualitiativeValue.TIME) {
+      keys = getDateRangeKeys(
+          setting.getRangeFrom(),
+          setting.getRangeTo(),
+          setting.getFilter().getTimestep(),
+          dateNormalizer
+      );
+    } else {
+      keys = new HashSet<>();
+    }
+
+    Map<String, List<Double>> data = null;
 
     //Compute result
     switch (setting.getAxis().getX()) {
       case TIME:
-        return mapByTime(
-            timeFormat,
+        data = mapByTime(
+            dateNormalizer,
             setting.getAxis().getY(),
             routes);
+        break;
 
       case DESTINATION:
-        return mapToQuantitive(
-            timeFormat,
+        data = mapToQuantitive(
+            dateNormalizer,
             setting.getAxis().getY(),
+            keys,
             mapByDestination(routes));
+        break;
 
       case AIRLINE:
-        return mapToQuantitive(
-            timeFormat,
+        data = mapToQuantitive(
+            dateNormalizer,
             setting.getAxis().getY(),
+            keys,
             mapByAirline(routes));
-
-      default:
-        return null;
+        break;
     }
+
+    return FilterResponse.builder()
+        .data(data)
+        .x(keys.stream().sorted().map(dateNormalizer::format).collect(Collectors.toList()))
+        .y(setting.getAxis().getY())
+        .z(setting.getAxis().getX())
+        .build();
   }
 
   private void checkSetting(@NonNull Setting setting) {
@@ -92,23 +111,20 @@ public class RouteController {
       throw new AssertionError("Filter should not be null!");
   }
 
-  public Map<String, Double> mapByTime(
-      SimpleDateFormat timeFormat,
+  public Map<String, List<Double>> mapByTime(
+      DateNormalizer dateNormalizer,
       QuantitiveValue quant, List<Route> routes) {
 
     //Sort by Date and sum values
     return routes
         .stream()
-        .peek(route -> {
-          //Normalize date of route to timeStep
-          try {
-            route.setDate(timeFormat.parse(timeFormat.format(route.getDate())));
-          } catch (ParseException e){
-            throw new AssertionError("Date Parse Error");
-          }
-        })
-        .collect(Collectors.groupingBy(route -> timeFormat.format(route.getDate()),
-            Collectors.summingDouble(route -> getQuant(quant, route))
+        .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
+        .sorted((r1, r2) -> r1.getDate().compareTo(r2.getDate()))
+        .collect(Collectors.groupingBy(route -> dateNormalizer.format(route.getDate()),
+            Collectors.collectingAndThen(
+                Collectors.summingDouble(route -> getQuant(quant, route)),
+                Collections::singletonList
+            )
             )
         );
   }
@@ -131,10 +147,10 @@ public class RouteController {
 
   }
 
-  public Map<String, Double> mapToQuantitive(
-      SimpleDateFormat timeFormat, QuantitiveValue quant, Map<String, List<Route>> routeMap) {
+  public Map<String, List<Double>> mapToQuantitive(
+      DateNormalizer dateNormalizer, QuantitiveValue quant, Set<Date> keys, Map<String, List<Route>> routeMap) {
 
-    Map<String, Double> result = new HashMap<>();
+    Map<String, List<Double>> result = new TreeMap<>();
 
     //Map to quantity for each key
     for (String key : routeMap.keySet()) {
@@ -142,24 +158,20 @@ public class RouteController {
       //Sort by Date
       Map<Date, List<Route>> dateMap = routeMap.get(key)
           .stream()
-          .peek(route -> {
-            //Normalize date of route to timeStep
-            try {
-              route.setDate(timeFormat.parse(timeFormat.format(route.getDate())));
-            } catch (ParseException e){
-              throw new AssertionError("Date Parse Error");
-            }
-          })
+          .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
           .collect(Collectors.groupingBy(Route::getDate,
               Collectors.mapping(route -> route, Collectors.toList())));
 
-      //Strip to one value
-      Double value = dateMap.entrySet().stream()
-          .sorted(Map.Entry.comparingByKey())
-          .mapToDouble(e -> e.getValue().stream().mapToDouble(route -> getQuant(quant, route)).sum())
-          .sum();
+      //Insert missing keys
+      keys.forEach(keyValue -> dateMap.putIfAbsent(keyValue, new ArrayList<>()));
 
-      result.put(key, value);
+      //Strip to one value
+      List<Double> values = dateMap.entrySet().stream()
+          .sorted(Map.Entry.comparingByKey())
+          .map(e -> e.getValue().stream().mapToDouble(route -> getQuant(quant, route)).sum())
+          .collect(Collectors.toList());
+
+      result.put(key, values);
     }
 
     return result;
@@ -183,19 +195,42 @@ public class RouteController {
     }
   }
 
-  public SimpleDateFormat getDateTimeFormatter(TimeSteps timeStep) {
-    switch (timeStep) {
+  public Set<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, DateNormalizer dateNormalizer) {
 
+    Set<Date> result = new HashSet<>();
+
+    Calendar calendar = Calendar.getInstance(Locale.US);
+
+    //Init Steps
+    int calendarStep = 0;
+    switch (timestep) {
       case DAY_OF_WEEK:
-        return new SimpleDateFormat("EEEE", Locale.US);
+        calendarStep = Calendar.DAY_OF_WEEK;
+        break;
       case MONTH:
-        return new SimpleDateFormat("MMMM", Locale.US);
+        calendarStep = Calendar.MONTH;
+        break;
       case YEAR:
-        return new SimpleDateFormat("yyyy", Locale.US);
-      default:
-        return null;
+        calendarStep = Calendar.YEAR;
+        break;
     }
 
+    //Init start
+    calendar.setTime(rangeFrom);
+
+    //Normalize start day for year and months
+    if(timestep != TimeSteps.DAY_OF_WEEK)
+      calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+    //Save Keys into List
+    while (calendar.getTime().before(rangeTo)) {
+
+      result.add(dateNormalizer.normalizeDate(calendar.getTime()));
+
+      calendar.add(calendarStep, 1);
+    }
+
+    return result;
   }
 
 }
