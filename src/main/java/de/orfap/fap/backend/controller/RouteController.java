@@ -6,6 +6,8 @@ import de.orfap.fap.backend.domain.Setting;
 import de.orfap.fap.backend.domain.TimeSteps;
 import de.orfap.fap.backend.repositories.RouteRepository;
 import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/routes")
 public class RouteController {
 
+  public static final Logger LOG = LoggerFactory.getLogger(RouteController.class);
+
 
   @Autowired
   RouteRepository routeRepository;
@@ -38,6 +42,8 @@ public class RouteController {
   @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
   public FilterResponse filter(@RequestBody Setting setting) {
+
+    LOG.info("FILTER:" + setting.toString());
 
     checkSetting(setting);
 
@@ -228,6 +234,9 @@ public class RouteController {
     //Normalize start day for year and months
     if (timestep != TimeSteps.DAY_OF_WEEK)
       calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+    //FIX FOR rangeTo-Bug as Spring writes a day starting by 02:00:000
+    calendar.set(Calendar.HOUR_OF_DAY, 2);
 
     //Save Keys into List
     while (calendar.getTime().before(rangeTo)) {
