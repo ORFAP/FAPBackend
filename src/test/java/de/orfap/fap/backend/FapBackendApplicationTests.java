@@ -54,9 +54,6 @@ public class FapBackendApplicationTests {
         dateParser.parse("2014-01-01"),
         dateParser.parse("2015-01-01")
     );
-
-    System.out.println(expected);
-
     assertEquals(expected, routeController.findByYear(2014));
 
   }
