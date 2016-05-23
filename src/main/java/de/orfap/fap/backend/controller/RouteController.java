@@ -14,8 +14,10 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,30 @@ public class RouteController {
 
   @Autowired
   RouteRepository routeRepository;
+
+  @RequestMapping(value = "/search/findByYear", method = RequestMethod.GET)
+  @Cacheable("yearRoutes")
+  public List<Route> findByYear(@RequestParam("year") Integer year) {
+
+    if (year == null || year < 1970)
+      throw new IllegalArgumentException("Year should not be null and greater than 1970!");
+
+    DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.YEAR);
+
+    Date start;
+    Date end;
+
+    try {
+      start = dateNormalizer.parse(year.toString());
+      end = dateNormalizer.parse((Integer.toString(year + 1)));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Year could not be parsed to date.");
+    }
+
+    return routeRepository.findByDateBetween(start, end);
+
+  }
 
   @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
@@ -106,11 +132,11 @@ public class RouteController {
 
   private void checkSetting(@NonNull Setting setting) {
     if (setting == null)
-      throw new AssertionError("Setting should not be null!");
+      throw new IllegalArgumentException("Setting should not be null!");
     if (setting.getAxis() == null)
-      throw new AssertionError("Axis should not be null!");
+      throw new IllegalArgumentException("Axis should not be null!");
     if (setting.getFilter() == null)
-      throw new AssertionError("Filter should not be null!");
+      throw new IllegalArgumentException("Filter should not be null!");
   }
 
   public Map<String, List<Double>> mapByTime(
