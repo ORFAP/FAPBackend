@@ -48,13 +48,17 @@ public class FapBackendApplicationTests {
   RouteController routeController;
 
   @Test
-  public void testFindByYear(){
+  public void testFindByYear() throws Exception{
 
-    List<Route> result = routeController.findByYear(2014);
+    List<Route> expected = routeRepository.findByDateBetween(
+        dateParser.parse("2014-01-01"),
+        dateParser.parse("2015-01-01")
+    );
 
-    System.out.println(result);
+    System.out.println(expected);
 
-    assertEquals(routes.subList(0, 5), result);
+    assertEquals(expected, routeController.findByYear(2014));
+
   }
 
   @Test
