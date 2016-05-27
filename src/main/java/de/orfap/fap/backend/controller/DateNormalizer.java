@@ -15,6 +15,9 @@ import java.util.Locale;
  * OS: MacOS 10.11
  * Java-Version: 1.8
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
+ *
+ *
+ * Normalizes given dates to a given timestep, so they compared to each other.
  */
 public class DateNormalizer {
 
@@ -30,6 +33,14 @@ public class DateNormalizer {
   private static final Date SATURDAY;
   private static final Date SUNDAY;
 
+  /**
+   * Init the Day-Of-Week data.
+   *
+   * Due to the fakt that the beginning of
+   * the Date.class, which is the 01.01.1970,
+   * is not a Monday and so a sorting of normalized dates
+   * will be fail, if the dates are not shifted to the 05.01.1970.
+   */
   static {
     SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
     try {

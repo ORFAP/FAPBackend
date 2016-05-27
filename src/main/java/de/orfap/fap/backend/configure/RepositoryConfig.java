@@ -18,6 +18,10 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 @Configuration
 public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
 
+  /**
+   * Expose IDs of some entities on REST Interface.
+   * @param config repo Config
+   */
   @Override
   public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
     config.exposeIdsFor(Airline.class);

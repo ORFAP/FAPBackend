@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
  * OS: MacOS 10.11
  * Java-Version: 1.8
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
+ *
+ * Provides additional interfaces for the route entity.
  */
 @RestController
 @ExposesResourceFor(Route.class)
@@ -41,6 +43,11 @@ public class RouteController {
   @Autowired
   RouteRepository routeRepository;
 
+  /**
+   * Find routes by a given year.
+   * @param year to filter routes by
+   * @return routes of given year
+   */
   @RequestMapping(value = "/search/findByYear", method = RequestMethod.GET)
   @Cacheable("yearRoutes")
   public List<Route> findByYear(@RequestParam("year") Integer year) {
@@ -48,6 +55,7 @@ public class RouteController {
     if (year == null || year < 1970)
       throw new IllegalArgumentException("Year should not be null and greater than 1970!");
 
+    //Format start and end of given year
     DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.YEAR);
 
     Date start;
@@ -65,6 +73,11 @@ public class RouteController {
 
   }
 
+  /**
+   * Provides an interface to format data with given settings.
+   * @param setting to format data.
+   * @return formatted data
+   */
   @RequestMapping(value = "/filter", method = RequestMethod.POST)
   @Cacheable("filter")
   public FilterResponse filter(@RequestBody Setting setting) {
@@ -74,7 +87,7 @@ public class RouteController {
     checkSetting(setting);
 
     //Find filtered Data
-    List<Route> routes = routeRepository.findByDateBetweenAirportDestination(
+    List<Route> routes = routeRepository.findByDateBetweenAndFilteredByMarketAirline(
         setting.getRangeFrom(),
         setting.getRangeTo(),
         setting.getFilter().getAirlines(),
@@ -139,6 +152,14 @@ public class RouteController {
       throw new IllegalArgumentException("Filter should not be null!");
   }
 
+  /**
+   * Maps given routes by time to a given quantitive value.
+   * @param dateNormalizer to normalize dates.
+   * @param quant Quantitive Value to map.
+   * @param keys all possible keys of map.
+   * @param routes data to map on.
+   * @return mapped data.
+   */
   public Map<String, List<Double>> mapByTime(
       DateNormalizer dateNormalizer,
       QuantitiveValue quant, Set<Date> keys, List<Route> routes) {
@@ -168,6 +189,11 @@ public class RouteController {
 
   }
 
+  /**
+   * Maps routes by Airline.
+   * @param routes to map.
+   * @return mapped routes.
+   */
   public Map<String, List<Route>> mapByAirline(List<Route> routes) {
 
     //Grouping Routes to Airlines
@@ -177,6 +203,11 @@ public class RouteController {
 
   }
 
+  /**
+   * Maps routes by Destination.
+   * @param routes to map.
+   * @return mapped routes.
+   */
   public Map<String, List<Route>> mapByDestination(List<Route> routes) {
 
     //Grouping Routes to Destination
@@ -186,6 +217,14 @@ public class RouteController {
 
   }
 
+  /**
+   * Maps a given route map by time to a given quantitive value.
+   * @param dateNormalizer to normalize dates.
+   * @param quant Quantitive Value to map.
+   * @param keys all possible keys of map.
+   * @param routeMap data to map on.
+   * @return mapped data.
+   */
   public Map<String, List<Double>> mapToQuantitive(
       DateNormalizer dateNormalizer, QuantitiveValue quant, Set<Date> keys, Map<String, List<Route>> routeMap) {
 
@@ -216,6 +255,12 @@ public class RouteController {
     return result;
   }
 
+  /**
+   * Getter of quantitative value of a given route.
+   * @param quant quantitative value to return.
+   * @param route source of value.
+   * @return quantitative value of route.
+   */
   public double getQuant(QuantitiveValue quant, Route route) {
     switch (quant) {
 
@@ -234,6 +279,14 @@ public class RouteController {
     }
   }
 
+  /**
+   * Calculates all possible date keys of a given range.
+   * @param rangeFrom start of range (included)
+   * @param rangeTo end of range (excluded)
+   * @param timestep step to take
+   * @param dateNormalizer normalizer to format dates.
+   * @return Set of all possible date keys.
+   */
   public Set<Date> getDateRangeKeys(Date rangeFrom, Date rangeTo, TimeSteps timestep, DateNormalizer dateNormalizer) {
 
     Set<Date> result = new LinkedHashSet<>();

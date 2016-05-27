@@ -44,7 +44,15 @@ public interface RouteRepository extends CrudRepository<Route, UUID> {
       @Param("start")Date start,
       @Param("end")Date end);
 
-  default List<Route> findByDateBetweenAirportDestination(
+  /**
+   * Find routes within a given range and filtered by Market and Airline.
+   * @param start of range (included)
+   * @param end of range (excluded)
+   * @param airports to filter. If empty return all.
+   * @param destinations to filter. If empty return all.
+   * @return return filtered routes.
+   */
+  default List<Route> findByDateBetweenAndFilteredByMarketAirline(
       Date start,
       Date end,
       List<String> airports,

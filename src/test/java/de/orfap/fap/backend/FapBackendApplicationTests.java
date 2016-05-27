@@ -61,7 +61,7 @@ public class FapBackendApplicationTests {
   @Test
   public void testFilterFindBy1() throws Exception {
 
-    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+    List<Route> result = routeRepository.findByDateBetweenAndFilteredByMarketAirline(
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
         Collections.singletonList("LLL"),
@@ -75,7 +75,7 @@ public class FapBackendApplicationTests {
   @Test
   public void testFilterFindBy2() throws Exception {
 
-    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+    List<Route> result = routeRepository.findByDateBetweenAndFilteredByMarketAirline(
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
         Collections.EMPTY_LIST,
@@ -89,7 +89,7 @@ public class FapBackendApplicationTests {
   @Test
   public void testFilterFindBy3() throws Exception {
 
-    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+    List<Route> result = routeRepository.findByDateBetweenAndFilteredByMarketAirline(
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
         Collections.singletonList("AAA"),
@@ -103,7 +103,7 @@ public class FapBackendApplicationTests {
   @Test
   public void testFilterFindBy4() throws Exception {
 
-    List<Route> result = routeRepository.findByDateBetweenAirportDestination(
+    List<Route> result = routeRepository.findByDateBetweenAndFilteredByMarketAirline(
         dateParser.parse("2014-01-01"),
         dateParser.parse("2014-01-03"),
         Collections.EMPTY_LIST,

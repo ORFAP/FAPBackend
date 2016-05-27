@@ -16,6 +16,8 @@ import java.util.Map;
  * OS: MacOS 10.11
  * Java-Version: 1.8
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
+ *
+ * Response of the Filter method for routes.
  */
 @Data
 @Builder
