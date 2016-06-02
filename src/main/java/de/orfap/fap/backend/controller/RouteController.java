@@ -44,6 +44,16 @@ public class RouteController {
   RouteRepository routeRepository;
 
   /**
+   * Saves a list of routes at once.
+   * @param routes list of routes to save.
+   * @return saved routes.
+   */
+  @RequestMapping(value = "saveAll", method = RequestMethod.POST)
+  public Iterable<Route> saveAll(@RequestBody Iterable<Route> routes){
+    return routeRepository.save(routes);
+  }
+
+  /**
    * Find routes by a given year.
    * @param year to filter routes by
    * @return routes of given year
