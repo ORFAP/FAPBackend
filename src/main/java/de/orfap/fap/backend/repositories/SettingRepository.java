@@ -27,5 +27,8 @@ public interface SettingRepository extends CrudRepository<Setting, UUID> {
       @Param("name") String name,
       @Param("name") String creator);
 
+  List<Setting> findByCreatorContainingIgnoreCaseOrShareableTrue(
+      @Param("name") String creator);
+
 
 }
