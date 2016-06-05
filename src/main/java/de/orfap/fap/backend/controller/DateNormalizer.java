@@ -115,6 +115,8 @@ public class DateNormalizer {
         return new SimpleDateFormat("MMMM", Locale.US);
       case YEAR:
         return new SimpleDateFormat("yyyy", Locale.US);
+      case WEEK_OF_YEAR:
+        return new SimpleDateFormat("ww", Locale.US);
       default:
         return null;
     }

@@ -187,6 +187,41 @@ public class FapBackendApplicationTests {
   }
 
   @Test
+  public void mapByTimeWeek() {
+
+    DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.WEEK_OF_YEAR);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(dateNormalizer.parse("01"));
+      keys.add(dateNormalizer.parse("02"));
+      keys.add(dateNormalizer.parse("03"));
+      keys.add(dateNormalizer.parse("04"));
+      keys.add(dateNormalizer.parse("05"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+    Map<String, List<Double>> result = routeController.mapByTime(
+        new DateNormalizer(TimeSteps.WEEK_OF_YEAR),
+        QuantitiveValue.FLIGHTS,
+        keys,
+        routes.subList(0, 4));
+
+
+    Map<String, List<Double>> check = new LinkedHashMap<>();
+    check.put("01", Collections.singletonList(3.0));
+    check.put("02", Collections.singletonList(0.0));
+    check.put("03", Collections.singletonList(0.0));
+    check.put("04", Collections.singletonList(0.0));
+    check.put("05", Collections.singletonList(1.0));
+
+
+
+    assertEquals(check.toString(), result.toString());
+  }
+
+  @Test
   public void mapByTimeMonth() {
     SimpleDateFormat formatter = new SimpleDateFormat("MMMM", Locale.US);
     Set<Date> keys = new HashSet<>();
@@ -408,6 +443,56 @@ public class FapBackendApplicationTests {
   }
 
   @Test
+  public void mapToQuantWeek() {
+
+    Map<String, List<Route>> routeMap = new HashMap<>();
+    //Detroit
+    List<Route> detroitRoutes = new ArrayList<>();
+    detroitRoutes.add(routes.get(0));
+    routeMap.put("Detroit", detroitRoutes);
+
+    List<Route> sanFranRoutes = new ArrayList<>();
+    sanFranRoutes.add(routes.get(1));
+    routeMap.put("SanFrancisco", sanFranRoutes);
+
+    List<Route> newYorkRoutes = new ArrayList<>();
+    newYorkRoutes.add(routes.get(2));
+    newYorkRoutes.add(routes.get(3));
+    routeMap.put("NewYork", newYorkRoutes);
+
+
+    DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.WEEK_OF_YEAR);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(dateNormalizer.parse("01"));
+      keys.add(dateNormalizer.parse("02"));
+      keys.add(dateNormalizer.parse("03"));
+      keys.add(dateNormalizer.parse("04"));
+      keys.add(dateNormalizer.parse("05"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+
+    Map<String, List<Double>> result = routeController.mapToQuantitive(
+        dateNormalizer,
+        QuantitiveValue.FLIGHTS,
+        keys,
+        routeMap);
+
+
+    Map<String, List<Double>> check = new TreeMap<>();
+    check.put("Detroit", Arrays.asList(1.0, 0.0, 0.0, 0.0, 0.0));
+    check.put("SanFrancisco", Arrays.asList(1.0, 0.0, 0.0, 0.0, 0.0));
+    check.put("NewYork", Arrays.asList(1.0, 0.0, 0.0, 0.0, 1.0));
+
+    assertEquals(check, result);
+
+
+  }
+
+  @Test
   public void dateRangeKeysYear() {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.YEAR);
@@ -497,6 +582,41 @@ public class FapBackendApplicationTests {
       check.add(dateNormalizer.parse("Thursday"));
       check.add(dateNormalizer.parse("Friday"));
       check.add(dateNormalizer.parse("Sunday"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+    assertEquals(check, result);
+
+  }
+
+  @Test
+  public void dateRangeKeysWeek() {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    DateNormalizer dateNormalizer = new DateNormalizer(TimeSteps.WEEK_OF_YEAR);
+    Date from;
+    Date to;
+    try {
+      from = formatter.parse("2015-01-01");
+      to = formatter.parse("2015-02-05");
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+    Set<Date> result = routeController.getDateRangeKeys(
+        from, to, TimeSteps.WEEK_OF_YEAR, dateNormalizer);
+
+
+    Set<Date> check = new HashSet<>();
+    try {
+      check.add(dateNormalizer.parse("01"));
+      check.add(dateNormalizer.parse("02"));
+      check.add(dateNormalizer.parse("03"));
+      check.add(dateNormalizer.parse("04"));
+      check.add(dateNormalizer.parse("05"));
+      check.add(dateNormalizer.parse("06"));
 
     } catch (ParseException e) {
       throw new AssertionError("Date parse Error");

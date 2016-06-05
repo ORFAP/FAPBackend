@@ -10,5 +10,5 @@ package de.orfap.fap.backend.domain;
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
  */
 public enum  TimeSteps {
-  DAY_OF_WEEK, MONTH, YEAR
+  DAY_OF_WEEK, MONTH, YEAR, WEEK_OF_YEAR
 }

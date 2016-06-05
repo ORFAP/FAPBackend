@@ -187,7 +187,7 @@ public class RouteController {
         );
 
     //Insert missing keys
-    keys.forEach(keyValue -> dateMap.putIfAbsent(keyValue, new ArrayList<>()));
+    keys.forEach(keyValue -> dateMap.putIfAbsent(keyValue, Collections.singletonList(0.0)));
 
     return dateMap.entrySet().stream()
         .sorted(Map.Entry.comparingByKey())
@@ -315,14 +315,18 @@ public class RouteController {
       case YEAR:
         calendarStep = Calendar.YEAR;
         break;
+      case WEEK_OF_YEAR:
+        calendarStep = Calendar.WEEK_OF_YEAR;
     }
 
     //Init start
     calendar.setTime(rangeFrom);
 
     //Normalize start day for year and months
-    if (timestep != TimeSteps.DAY_OF_WEEK)
+    if (timestep != TimeSteps.DAY_OF_WEEK && timestep != TimeSteps.WEEK_OF_YEAR)
       calendar.set(Calendar.DAY_OF_MONTH, 1);
+    else if (timestep == TimeSteps.WEEK_OF_YEAR)
+      calendar.set(Calendar.DAY_OF_WEEK, 1);
 
     //FIX FOR rangeTo-Bug as Spring writes a day starting by 02:00:000
     calendar.set(Calendar.HOUR_OF_DAY, 2);
