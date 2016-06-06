@@ -99,10 +99,16 @@ public class DateNormalizer {
    * @return normalized string
    */
   public String format(Date date){
-    return formatter.format(date);
+    //format and remove leading zeros e.g. week 01 to 1
+    return formatter.format(date).replaceFirst("^0+(?!$)", "");
   }
 
   public Date parse (String date) throws ParseException{
+    //Format Week to correct format
+    if(steps == TimeSteps.WEEK_OF_YEAR && date.length() == 1){
+      return normalizeDate(formatter.parse("0" + date));
+    }
+
     return normalizeDate(formatter.parse(date));
   }
 

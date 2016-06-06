@@ -210,11 +210,11 @@ public class FapBackendApplicationTests {
 
 
     Map<String, List<Double>> check = new LinkedHashMap<>();
-    check.put("01", Collections.singletonList(3.0));
-    check.put("02", Collections.singletonList(0.0));
-    check.put("03", Collections.singletonList(0.0));
-    check.put("04", Collections.singletonList(0.0));
-    check.put("05", Collections.singletonList(1.0));
+    check.put("1", Collections.singletonList(3.0));
+    check.put("2", Collections.singletonList(0.0));
+    check.put("3", Collections.singletonList(0.0));
+    check.put("4", Collections.singletonList(0.0));
+    check.put("5", Collections.singletonList(1.0));
 
 
 
@@ -611,12 +611,12 @@ public class FapBackendApplicationTests {
 
     Set<Date> check = new HashSet<>();
     try {
-      check.add(dateNormalizer.parse("01"));
-      check.add(dateNormalizer.parse("02"));
-      check.add(dateNormalizer.parse("03"));
-      check.add(dateNormalizer.parse("04"));
-      check.add(dateNormalizer.parse("05"));
-      check.add(dateNormalizer.parse("06"));
+      check.add(dateNormalizer.parse("1"));
+      check.add(dateNormalizer.parse("2"));
+      check.add(dateNormalizer.parse("3"));
+      check.add(dateNormalizer.parse("4"));
+      check.add(dateNormalizer.parse("5"));
+      check.add(dateNormalizer.parse("6"));
 
     } catch (ParseException e) {
       throw new AssertionError("Date parse Error");
