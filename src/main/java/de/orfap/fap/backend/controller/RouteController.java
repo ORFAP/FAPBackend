@@ -1,9 +1,13 @@
 package de.orfap.fap.backend.controller;
 
+import de.orfap.fap.backend.domain.Airline;
+import de.orfap.fap.backend.domain.Market;
 import de.orfap.fap.backend.domain.QuantitiveValue;
 import de.orfap.fap.backend.domain.Route;
 import de.orfap.fap.backend.domain.Setting;
 import de.orfap.fap.backend.domain.TimeSteps;
+import de.orfap.fap.backend.repositories.AirlineRepository;
+import de.orfap.fap.backend.repositories.MarketRepository;
 import de.orfap.fap.backend.repositories.RouteRepository;
 import lombok.NonNull;
 import org.slf4j.Logger;
@@ -11,6 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,7 +38,7 @@ import java.util.stream.Collectors;
  * OS: MacOS 10.11
  * Java-Version: 1.8
  * System: 2,3 GHz Intel Core i7, 16 GB 1600 MHz DDR3
- *
+ * <p>
  * Provides additional interfaces for the route entity.
  */
 @RestController
@@ -43,18 +52,68 @@ public class RouteController {
   @Autowired
   RouteRepository routeRepository;
 
+  @Autowired
+  AirlineRepository airlineRepository;
+
+  @Autowired
+  MarketRepository marketRepository;
+
+  @Autowired
+  Validator validator;
+
   /**
    * Saves a list of routes at once.
+   *
    * @param routes list of routes to save.
    * @return saved routes.
    */
   @RequestMapping(value = "saveAll", method = RequestMethod.POST)
-  public Iterable<Route> saveAll(@RequestBody Iterable<Route> routes){
-    return routeRepository.save(routes);
+  public ResponseEntity saveAll(@RequestBody List<RouteRequest> routes, BindingResult bindingResult) {
+
+    List<Route> routeList = null;
+
+    try {
+      routeList = routes.stream().map(routeRequest -> {
+
+        Airline airline = airlineRepository.findOne(routeRequest.getAirline());
+        Market source = marketRepository.findOne(routeRequest.getSource());
+        Market destination = marketRepository.findOne(routeRequest.getDestination());
+
+        return new Route(
+            routeRequest.getDate(),
+            routeRequest.getDelays(),
+            routeRequest.getCancelled(),
+            routeRequest.getPassengerCount(),
+            routeRequest.getFlightCount(),
+            airline,
+            source,
+            destination
+        );
+
+      })
+          .peek(route -> {
+            BeanPropertyBindingResult errors = new BeanPropertyBindingResult(route, bindingResult.getObjectName());
+            validator.validate(route, errors);
+            if (errors.hasErrors())
+              bindingResult.addAllErrors(errors);
+          })
+          .collect(Collectors.toList());
+
+    } catch (Exception exception){
+      bindingResult.addError(new ObjectError(exception.getClass().getName(), exception.getMessage()));
+    }
+
+    if(bindingResult.hasErrors()){
+      return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+    }
+
+    routeRepository.save(routeList);
+    return ResponseEntity.ok().build();
   }
 
   /**
    * Find routes by a given year.
+   *
    * @param year to filter routes by
    * @return routes of given year
    */
@@ -85,6 +144,7 @@ public class RouteController {
 
   /**
    * Provides an interface to format data with given settings.
+   *
    * @param setting to format data.
    * @return formatted data
    */
@@ -164,10 +224,11 @@ public class RouteController {
 
   /**
    * Maps given routes by time to a given quantitive value.
+   *
    * @param dateNormalizer to normalize dates.
-   * @param quant Quantitive Value to map.
-   * @param keys all possible keys of map.
-   * @param routes data to map on.
+   * @param quant          Quantitive Value to map.
+   * @param keys           all possible keys of map.
+   * @param routes         data to map on.
    * @return mapped data.
    */
   public Map<String, List<Double>> mapByTime(
@@ -201,6 +262,7 @@ public class RouteController {
 
   /**
    * Maps routes by Airline.
+   *
    * @param routes to map.
    * @return mapped routes.
    */
@@ -215,6 +277,7 @@ public class RouteController {
 
   /**
    * Maps routes by Destination.
+   *
    * @param routes to map.
    * @return mapped routes.
    */
@@ -229,10 +292,11 @@ public class RouteController {
 
   /**
    * Maps a given route map by time to a given quantitive value.
+   *
    * @param dateNormalizer to normalize dates.
-   * @param quant Quantitive Value to map.
-   * @param keys all possible keys of map.
-   * @param routeMap data to map on.
+   * @param quant          Quantitive Value to map.
+   * @param keys           all possible keys of map.
+   * @param routeMap       data to map on.
    * @return mapped data.
    */
   public Map<String, List<Double>> mapToQuantitive(
@@ -267,6 +331,7 @@ public class RouteController {
 
   /**
    * Getter of quantitative value of a given route.
+   *
    * @param quant quantitative value to return.
    * @param route source of value.
    * @return quantitative value of route.
@@ -291,9 +356,10 @@ public class RouteController {
 
   /**
    * Calculates all possible date keys of a given range.
-   * @param rangeFrom start of range (included)
-   * @param rangeTo end of range (excluded)
-   * @param timestep step to take
+   *
+   * @param rangeFrom      start of range (included)
+   * @param rangeTo        end of range (excluded)
+   * @param timestep       step to take
    * @param dateNormalizer normalizer to format dates.
    * @return Set of all possible date keys.
    */
