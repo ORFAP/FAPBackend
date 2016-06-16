@@ -1,6 +1,7 @@
 package de.orfap.fap.backend.repositories;
 
 import de.orfap.fap.backend.domain.Route;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -20,6 +21,30 @@ import java.util.UUID;
  */
 @RepositoryRestResource
 public interface RouteRepository extends CrudRepository<Route, UUID> {
+
+  @Override
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
+  <S extends Route> S save(S entity);
+
+  @Override
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
+  <S extends Route> Iterable<S> save(Iterable<S> entities);
+
+  @Override
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
+  void delete(UUID uuid);
+
+  @Override
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
+  void delete(Route entity);
+
+  @Override
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
+  void delete(Iterable<? extends Route> entities);
+
+  @Override
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
+  void deleteAll();
 
   //FindBy Methods
   // http://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods

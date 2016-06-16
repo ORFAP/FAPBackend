@@ -13,6 +13,7 @@ import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,7 @@ public class RouteController {
    * @return saved routes.
    */
   @RequestMapping(value = "saveAll", method = RequestMethod.POST)
+  @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
   public ResponseEntity saveAll(@RequestBody List<RouteRequest> routes, BindingResult bindingResult) {
 
     List<Route> routeList = null;
