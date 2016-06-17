@@ -152,7 +152,7 @@ public class RouteController {
    * @return true if there is are routes saved
    */
   @RequestMapping(value = "/search/isRouteInMonthOfYear", method = RequestMethod.GET)
-  public Boolean isRouteInMonthOfYear(@RequestParam("date")@DateTimeFormat(pattern="yyyy-MM-dd") Date date) {
+  public Boolean isRouteInMonthOfYear(@RequestParam("date")@DateTimeFormat(pattern="yyyy-MM") Date date) {
 
     if(date == null)
       throw new IllegalArgumentException("Date should not be null.");
