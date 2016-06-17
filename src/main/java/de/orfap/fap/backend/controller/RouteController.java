@@ -30,7 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 /**
  * Organization: HM FK07.
@@ -268,17 +270,26 @@ public class RouteController {
       DateNormalizer dateNormalizer,
       QuantitiveValue quant, Set<Date> keys, List<Route> routes) {
 
-    //Sort by Date and sum values
-    Map<Date, List<Double>> dateMap = routes
-        .stream()
-        .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
-        .collect(Collectors.groupingBy(Route::getDate,
-            Collectors.collectingAndThen(
-                Collectors.summingDouble(route -> getQuant(quant, route)),
-                Collections::singletonList
-            )
-            )
-        );
+    Map<Date, List<Double>> dateMap;
+    Collector<Route, ?, Double> collector;
+
+    //Take averaging Collector on average otherwise summing
+    if(quant == QuantitiveValue.AVGDELAY)
+        collector= Collectors.averagingDouble(route -> getQuant(quant, route));
+    else
+        collector = Collectors.summingDouble(route -> getQuant(quant, route));
+
+    //Sort by Date and collect values
+     dateMap = routes
+          .stream()
+          .peek(route -> route.setDate(dateNormalizer.normalizeDate(route.getDate())))
+          .collect(Collectors.groupingBy(Route::getDate,
+              Collectors.collectingAndThen(
+                  collector,
+                  Collections::singletonList
+              )
+              )
+          );
 
     //Insert missing keys
     keys.forEach(keyValue -> dateMap.putIfAbsent(keyValue, Collections.singletonList(0.0)));
@@ -353,7 +364,14 @@ public class RouteController {
       //Strip to one value
       List<Double> values = dateMap.entrySet().stream()
           .sorted(Map.Entry.comparingByKey())
-          .map(e -> e.getValue().stream().mapToDouble(route -> getQuant(quant, route)).sum())
+          .map(e -> {
+                DoubleStream stream = e.getValue().stream().mapToDouble(route -> getQuant(quant, route));
+                if(quant == QuantitiveValue.AVGDELAY)
+                  return stream.average().orElse(0);
+                else
+                  return stream.sum();
+              }
+          )
           .collect(Collectors.toList());
 
       result.put(key, values);
@@ -377,11 +395,11 @@ public class RouteController {
       case PASSENGERS:
         return route.getPassengerCount();
       case DELAYFREQ:
-        return route.getDelays();
+        return (route.getDelays() > 0 )? 1 : 0;
       case CANCELLATIONS:
         return route.getCancelled();
       case AVGDELAY:
-        return 0; //TODO
+        return route.getDelays();
       default:
         return 0;
     }
