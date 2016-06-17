@@ -162,15 +162,13 @@ public class RouteController {
     calendar.setTime(date);
 
     //set start day to one to get whole month
-    int calendarStep = Calendar.MONTH;
-    calendar.set(calendarStep, 1);
+    calendar.set(Calendar.DAY_OF_MONTH, 1);
 
     //Get Start and End of month
     Date start = calendar.getTime();
 
-    calendar.add(calendarStep, 1);
+    calendar.set(Calendar.MONTH, calendar.getMaximum(Calendar.MONTH));
     Date end = calendar.getTime();
-
 
     return !routeRepository.findByDateBetween(start, end).isEmpty();
 

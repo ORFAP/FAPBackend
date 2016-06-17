@@ -26,6 +26,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = FapBackendApplication.class)
@@ -626,6 +627,24 @@ public class FapBackendApplicationTests {
 
   }
 
+  @Test
+  public void isRouteInMonth() {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    Date monthIncluded;
+    Date monthNotIncluded;
+
+    try {
+
+      monthIncluded = formatter.parse("2015-01-01");
+      monthNotIncluded = formatter.parse("2015-12-01");
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+    assertTrue(routeController.isRouteInMonthOfYear(monthIncluded));
+    assertTrue(!routeController.isRouteInMonthOfYear(monthNotIncluded));
+  }
 
   @Before
   public void setUp() {
