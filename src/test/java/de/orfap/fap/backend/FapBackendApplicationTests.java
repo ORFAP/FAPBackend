@@ -250,6 +250,33 @@ public class FapBackendApplicationTests {
   }
 
   @Test
+  public void mapByTimeMonthAvgDelay() {
+    SimpleDateFormat formatter = new SimpleDateFormat("MMMM", Locale.US);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(formatter.parse("January"));
+      keys.add(formatter.parse("February"));
+      keys.add(formatter.parse("March"));
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+    Map<String, List<Double>> result = routeController.mapByTime(
+        new DateNormalizer(TimeSteps.MONTH),
+        QuantitiveValue.AVGDELAY,
+        keys,
+        routes.subList(0, 5));
+
+
+    Map<String, List<Double>> check = new LinkedHashMap<>();
+    check.put("January", Collections.singletonList(1.0));
+    check.put("February", Collections.singletonList(1.0));
+    check.put("March", Collections.singletonList(1.0));
+
+    assertEquals(check.toString(), result.toString());
+  }
+
+  @Test
   public void mapByTimeYear() {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy", Locale.US);
     Set<Date> keys = new HashSet<>();
@@ -322,6 +349,57 @@ public class FapBackendApplicationTests {
     check.put("Detroit", Arrays.asList(2.0, 0.0, 0.0));
     check.put("SanFrancisco", Arrays.asList(1.0, 1.0, 0.0));
     check.put("NewYork", Arrays.asList(2.0, 0.0, 1.0));
+
+    assertEquals(check, result);
+
+
+  }
+
+  @Test
+  public void mapToQuantYearAvgDelay() {
+
+    Map<String, List<Route>> routeMap = new HashMap<>();
+    //Detroit
+    List<Route> detroitRoutes = new ArrayList<>();
+    detroitRoutes.add(routes.get(0));
+    detroitRoutes.add(routes.get(4));
+    routeMap.put("Detroit", detroitRoutes);
+
+    List<Route> sanFranRoutes = new ArrayList<>();
+    sanFranRoutes.add(routes.get(1));
+    sanFranRoutes.add(routes.get(5));
+    routeMap.put("SanFrancisco", sanFranRoutes);
+
+    List<Route> newYorkRoutes = new ArrayList<>();
+    newYorkRoutes.add(routes.get(2));
+    newYorkRoutes.add(routes.get(3));
+    newYorkRoutes.add(routes.get(6));
+    routeMap.put("NewYork", newYorkRoutes);
+
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy", Locale.US);
+    Set<Date> keys = new HashSet<>();
+    try {
+      keys.add(formatter.parse("2014"));
+      keys.add(formatter.parse("2015"));
+      keys.add(formatter.parse("2016"));
+
+    } catch (ParseException e) {
+      throw new AssertionError("Date parse Error");
+    }
+
+
+    Map<String, List<Double>> result = routeController.mapToQuantitive(
+        new DateNormalizer(TimeSteps.YEAR),
+        QuantitiveValue.AVGDELAY,
+        keys,
+        routeMap);
+
+
+    Map<String, List<Double>> check = new TreeMap<>();
+    check.put("Detroit", Arrays.asList(1.0, 0.0, 0.0));
+    check.put("SanFrancisco", Arrays.asList(1.0, 1.0, 0.0));
+    check.put("NewYork", Arrays.asList(1.0, 0.0, 1.0));
 
     assertEquals(check, result);
 
