@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -141,6 +142,36 @@ public class RouteController {
     }
 
     return routeRepository.findByDateBetween(start, end);
+
+  }
+
+  /**
+   * Test if there is are routes in the given month of year.
+   *
+   * @param date to find
+   * @return true if there is are routes saved
+   */
+  @RequestMapping(value = "/search/isRouteInMonthOfYear", method = RequestMethod.GET)
+  public Boolean isRouteInMonthOfYear(@RequestParam("date")@DateTimeFormat(pattern="yyyy-MM") Date date) {
+
+    if(date == null)
+      throw new IllegalArgumentException("Date should not be null.");
+
+    //Init Calendar to given date
+    Calendar calendar = Calendar.getInstance(Locale.US);
+    calendar.setTime(date);
+
+    //set start day to one to get whole month
+    calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+    //Get Start and End of month
+    Date start = calendar.getTime();
+
+    calendar.set(Calendar.MONTH, calendar.getMaximum(Calendar.MONTH));
+    Date end = calendar.getTime();
+
+    return !routeRepository.findByDateBetween(start, end).isEmpty();
+
 
   }
 
