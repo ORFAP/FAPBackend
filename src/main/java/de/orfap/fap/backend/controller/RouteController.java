@@ -169,12 +169,10 @@ public class RouteController {
     //Get Start and End of month
     Date start = calendar.getTime();
 
-    calendar.set(Calendar.MONTH, calendar.getMaximum(Calendar.MONTH));
+    calendar.add(Calendar.MONTH, 1);
     Date end = calendar.getTime();
 
     return !routeRepository.findByDateBetween(start, end).isEmpty();
-
-
   }
 
   /**

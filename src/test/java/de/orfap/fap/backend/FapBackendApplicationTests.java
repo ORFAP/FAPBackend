@@ -707,14 +707,14 @@ public class FapBackendApplicationTests {
 
   @Test
   public void isRouteInMonth() {
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM", Locale.US);
     Date monthIncluded;
     Date monthNotIncluded;
 
     try {
 
-      monthIncluded = formatter.parse("2015-01-01");
-      monthNotIncluded = formatter.parse("2015-12-01");
+      monthIncluded = formatter.parse("2015-01");
+      monthNotIncluded = formatter.parse("2015-11");
 
     } catch (ParseException e) {
       throw new AssertionError("Date parse Error");
