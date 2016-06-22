@@ -84,6 +84,19 @@ public class RouteController {
         Market source = marketRepository.findOne(routeRequest.getSource());
         Market destination = marketRepository.findOne(routeRequest.getDestination());
 
+        if(airline == null || source == null || destination == null){
+          StringBuilder sb = new StringBuilder("Cant find: ");
+
+          if(airline == null)
+            sb.append("\nAirline with ID: ").append(routeRequest.getAirline());
+          if(source == null)
+            sb.append("\nMarket with ID: ").append(routeRequest.getSource());
+          if(destination == null)
+            sb.append("\nMarket with ID: ").append(routeRequest.getDestination());
+
+          throw new IllegalArgumentException(sb.toString());
+        }
+
         return new Route(
             routeRequest.getDate(),
             routeRequest.getDelays(),
