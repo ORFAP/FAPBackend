@@ -13,7 +13,11 @@
 3. FapBackendApplication.main als Spring Application starten
 
 ###Docker
+#### Local debug profile:
 ```docker run -d -p 8081:8080 darenegade/fapbackend```
+#### Production configuration:
+```docker run -d -e TZ=GMT+2 -e "SPRING_PROFILES_ACTIVE=production" -p 8081:8080 darenegade/fapbackend```
+
 
 
 ##RESTful
