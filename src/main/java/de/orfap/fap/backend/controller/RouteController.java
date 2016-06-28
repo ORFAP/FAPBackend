@@ -457,7 +457,7 @@ public class RouteController {
       calendar.set(Calendar.DAY_OF_WEEK, 1);
 
     //FIX FOR rangeTo-Bug as Spring writes a day starting by 02:00:000
-    calendar.set(Calendar.HOUR_OF_DAY, 2);
+    //calendar.set(Calendar.HOUR_OF_DAY, 2);
 
     //Save Keys into List
     while (calendar.getTime().before(rangeTo)) {
