@@ -1,6 +1,8 @@
 # FAPBackend
 
 [![Build Status](https://travis-ci.org/ORFAP/FAPBackend.svg?branch=master)](https://travis-ci.org/ORFAP/FAPBackend)
+[![codecov](https://codecov.io/gh/ORFAP/FAPBackend/branch/master/graph/badge.svg)](https://codecov.io/gh/ORFAP/FAPBackend)
+
 
 
 ##Starten
