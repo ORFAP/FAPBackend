@@ -16,6 +16,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'jacoco'
 
 jar {
     baseName = 'FAPBackend'
@@ -61,6 +62,15 @@ dependencies {
     testCompile('com.jayway.restassured:rest-assured:2.9.0')
 
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+check.dependsOn jacocoTestReport
 
 
 eclipse {
