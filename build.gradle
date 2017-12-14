@@ -73,7 +73,6 @@ jacocoTestReport {
 
 check.dependsOn jacocoTestReport
 
-
 eclipse {
     classpath {
         containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
