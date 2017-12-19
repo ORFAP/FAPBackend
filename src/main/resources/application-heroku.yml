@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://dumbo.db.elephantsql.com:5432/hdgxacge"
+    username: "hdgxacge"
+# Set in Heroku
+#    password:
+    tomcat:
+# Stupid ElephantSQL Limit...
+      max-active: 2
+      max-wait: 10000
+  jpa:
+    hibernate:
+        ddl-auto: update
+    database: postgresql

@@ -52,6 +52,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
 
     //DB
+    runtime('org.postgresql:postgresql:9.4-1201-jdbc41')
     runtime('mysql:mysql-connector-java')
     runtime('org.hsqldb:hsqldb')
 
