@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: "jdbc:mysql://johnny.heliohost.com:3306/thef4b1_orfapbackend"
+    url: "jdbc:mysql://johnny.heliohost.org:3306/thef4b1_orfapbackend"
     username: "orfap"
 # Set in Heroku
 #    password:
