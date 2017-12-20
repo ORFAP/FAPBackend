@@ -6,7 +6,7 @@ spring:
     #password:
   tomcat:
     # Stupid mysql Limit...
-    max-active: 4
+    max-active: 3
     max-wait: 10000
   jpa:
     hibernate:
