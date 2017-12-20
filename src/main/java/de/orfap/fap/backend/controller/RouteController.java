@@ -18,6 +18,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -71,9 +72,10 @@ public class RouteController {
    * @param routes list of routes to save.
    * @return saved routes.
    */
+  @Async
   @RequestMapping(value = "saveAll", method = RequestMethod.POST)
   @CacheEvict(value = {"yearRoutes", "filter"}, allEntries = true)
-  public ResponseEntity saveAll(@RequestBody List<RouteRequest> routes, BindingResult bindingResult) {
+  public void saveAll(@RequestBody List<RouteRequest> routes, BindingResult bindingResult) {
 
     List<Route> routeList = null;
 
@@ -122,11 +124,10 @@ public class RouteController {
     }
 
     if(bindingResult.hasErrors()){
-      return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+      LOG.error("Error during save: {}", bindingResult.getAllErrors());
     }
 
     routeRepository.save(routeList);
-    return ResponseEntity.ok().build();
   }
 
   /**
