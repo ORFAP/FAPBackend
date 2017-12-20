@@ -4,10 +4,10 @@ spring:
     username: "thef4b1_orfap"
     # Set in Heroku
     #password:
-  tomcat:
-    # Stupid mysql Limit...
-    max-active: 3
-    max-wait: 10000
+    tomcat:
+      # Stupid mysql Limit...
+      max-active: 4
+      max-wait: 10000
   jpa:
     hibernate:
         ddl-auto: update
