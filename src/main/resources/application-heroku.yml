@@ -7,7 +7,7 @@ spring:
     tomcat:
       # Stupid mysql Limit...
       max-active: 4
-      max-wait: 10000
+      max-wait: 100000
   jpa:
     hibernate:
         ddl-auto: update
